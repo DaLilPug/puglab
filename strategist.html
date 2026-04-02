@@ -6,32 +6,39 @@
   <title>Strategist Performance — Uptown Creation</title>
   <link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/652e9dbbc7a19b06feb5076f_UN_Favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --navy: #013A52; --navy-dark: #012a3d; --navy-light: #edf3f6; --navy-mid: rgba(1,58,82,.06);
-      --green: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
+      --green: #1EB683; --green-500: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
       --gray-mid: #A8B4C4;
-      --white: #ffffff; --bg: #f0f3f5;
+      --white: #ffffff; --bg: #f4f6f8;
+      --surface-1: #ffffff;
+      --surface-2: #f7f9fb;
+      --border: rgba(1,58,82,.08);
       --gray-100: #e8ecef; --gray-200: #d4dade; --gray-400: #8899a6; --gray-600: #4d5f6b;
       --red: #e53e3e; --red-light: #fff0f0;
       --amber: #f59e0b; --amber-light: #fef3c7;
       --blue: #3b9fd4; --blue-light: #e8f4fb;
-      --r: 10px; --r-lg: 16px; --r-pill: 999px;
-      --shadow-xs: 0 1px 3px rgba(1,58,82,.06), 0 1px 2px rgba(1,58,82,.04);
-      --shadow-sm: 0 2px 8px rgba(1,58,82,.08), 0 1px 3px rgba(1,58,82,.05);
-      --shadow-md: 0 8px 24px rgba(1,58,82,.10), 0 2px 8px rgba(1,58,82,.06);
-      --shadow-lg: 0 20px 60px rgba(1,58,82,.18), 0 4px 16px rgba(1,58,82,.08);
+      --r: 12px; --r-lg: 18px; --r-pill: 999px;
+      --shadow-xs: 0 1px 4px rgba(1,58,82,.05), 0 0 0 1px rgba(1,58,82,.04);
+      --shadow-sm: 0 2px 12px rgba(1,58,82,.08);
+      --shadow-md: 0 8px 32px rgba(1,58,82,.10);
+      --shadow-lg: 0 24px 64px rgba(1,58,82,.16);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; line-height: 1.2; }
+    :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     /* HEADER */
-    .header { background: linear-gradient(135deg, #013A52 0%, #01526e 100%); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 66px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md); }
+    .header { background: rgba(1,58,82,.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(255,255,255,.06), var(--shadow-md); }
     .header-left { display: flex; align-items: center; gap: 16px; }
     .btn-back { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.8); padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer; font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; text-decoration: none; transition: all .2s; letter-spacing: .05em; text-transform: uppercase; }
     .btn-back:hover { background: rgba(255,255,255,.16); color: #fff; }
@@ -44,28 +51,32 @@
     #last-updated { font-size: 11px; color: rgba(168,180,196,.7); }
 
     /* FILTER BAR */
-    .filter-bar { background: var(--white); border-bottom: 1px solid var(--gray-100); padding: 12px 40px; display: flex; align-items: center; gap: 10px; position: sticky; top: 66px; z-index: 90; box-shadow: var(--shadow-xs); }
+    .filter-bar { background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 12px 40px; display: flex; align-items: center; gap: 10px; position: sticky; top: 64px; z-index: 90; box-shadow: var(--shadow-xs); }
     .filter-label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .1em; }
     .btn-period { height: 32px; padding: 0 14px; background: var(--bg); color: var(--gray-600); border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; transition: all .15s; letter-spacing: .04em; }
     .btn-period:hover { border-color: var(--navy); color: var(--navy); }
     .btn-period.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .view-toggle { display: inline-flex; background: var(--bg); border: 1.5px solid var(--gray-200); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+    .view-toggle-btn { height: 26px; width: 30px; padding: 0; background: transparent; border: none; border-radius: var(--r-pill); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray-400); transition: all .15s; }
+    .view-toggle-btn.active { background: var(--navy); color: #fff; box-shadow: 0 1px 4px rgba(1,58,82,.18); }
+    .view-toggle-btn:not(.active):hover { color: var(--navy); background: var(--navy-light); }
     .filter-spacer { flex: 1; }
     .sort-label { font-size: 11px; color: var(--gray-400); font-weight: 600; }
-    .sort-select { height: 32px; padding: 0 12px; border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--navy); background: var(--bg); outline: none; cursor: pointer; }
+    .sort-select { height: 32px; padding: 0 28px 0 12px; border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--navy); background: var(--bg); outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238899a6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
 
     /* MAIN */
     .main { max-width: 1440px; margin: 0 auto; padding: 36px 48px 72px; }
 
     /* SUMMARY CARDS */
     .summary-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
-    .summary-card { background: var(--white); border-radius: var(--r-lg); padding: 22px 24px; box-shadow: var(--shadow-xs); border: 1px solid rgba(255,255,255,.8); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; animation: fadeUp .5s ease both; }
+    .summary-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 22px 24px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; animation: fadeUp .5s ease both; }
     .summary-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .summary-card:nth-child(1) { animation-delay:  0ms; }
     .summary-card:nth-child(2) { animation-delay: 60ms; }
     .summary-card:nth-child(3) { animation-delay:120ms; }
     .summary-card:nth-child(4) { animation-delay:180ms; }
     .summary-card:nth-child(5) { animation-delay:240ms; }
-    .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+    .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
     .summary-card:nth-child(1)::before { background: var(--green); }
     .summary-card:nth-child(2)::before { background: var(--navy); }
     .summary-card:nth-child(3)::before { background: var(--blue); }
@@ -75,32 +86,35 @@
     .summary-card:first-child .summary-value { color: #fff; }
     .summary-card:first-child .summary-label { color: rgba(168,180,196,.8); }
     .summary-card:first-child::before { background: var(--green); }
-    .summary-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 8px; }
+    .summary-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 8px; font-variant-numeric: tabular-nums; font-family: 'Montserrat', sans-serif; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .summary-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
 
     /* LEADERBOARD + TABLE */
-    .section { background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,.8); margin-bottom: 28px; overflow: hidden; }
+    .section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 28px; overflow: hidden; }
     .section-hdr { padding: 20px 28px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
     .section-title { font-size: 11px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .09em; }
     .section-hint { font-size: 10px; color: var(--gray-400); font-weight: 600; }
 
     /* STRATEGIST CARDS GRID */
     .strat-grid { display: grid; grid-template-columns: 1fr; gap: 24px; padding: 28px; }
-    .strat-card { background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--gray-100); overflow: hidden; transition: box-shadow .25s, transform .25s; cursor: pointer; animation: fadeUp .45s ease both; }
+    .strat-card { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--border); overflow: hidden; transition: box-shadow .25s, transform .25s; cursor: pointer; animation: fadeUp .45s ease both; }
     .strat-card:nth-child(1) { animation-delay:  0ms; }
     .strat-card:nth-child(2) { animation-delay: 80ms; }
     .strat-card:nth-child(3) { animation-delay:160ms; }
     .strat-card:nth-child(4) { animation-delay:240ms; }
     .strat-card:nth-child(5) { animation-delay:320ms; }
-    .strat-card:hover { box-shadow: 0 10px 30px rgba(1,58,82,.12), 0 2px 8px rgba(30,182,131,.06); transform: translateY(-3px); }
+    .strat-card:hover { box-shadow: var(--shadow-md), 0 2px 8px rgba(30,182,131,.06); transform: translateY(-3px); }
     .strat-card-header { background: linear-gradient(135deg, var(--navy) 0%, #01526e 100%); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
     .strat-name { font-size: 16px; font-weight: 800; color: #fff; }
     .strat-client-count { font-size: 11px; color: rgba(168,180,196,.8); font-weight: 600; margin-top: 4px; }
+    .strat-header-stat { text-align: right; }
+    .strat-header-num { font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
+    .strat-header-lbl { font-size: 10px; color: rgba(168,180,196,.7); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
     .strat-rank { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
     .strat-rank.rank-1 { background: #f59e0b; color: #fff; }
     .strat-rank.rank-2 { background: var(--gray-400); color: #fff; }
     .strat-rank.rank-3 { background: #cd7f32; color: #fff; }
-    .strat-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--gray-100); }
+    .strat-metrics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--gray-100); }
     .strat-metric { background: var(--white); padding: 18px 14px; text-align: center; transition: background .15s; }
     .strat-metric:hover { background: var(--navy-light); }
     .strat-metric-val { font-size: 18px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 6px; transition: color .15s; }
@@ -117,12 +131,14 @@
 
     /* COMPARISON TABLE */
     .comp-table { width: 100%; border-collapse: collapse; min-width: 900px; }
-    .comp-table th { background: var(--bg); border-bottom: 2px solid var(--gray-100); padding: 12px 18px; text-align: left; font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; cursor: pointer; user-select: none; transition: all .15s; }
+    .comp-table th { background: var(--surface-2); border-bottom: 2px solid var(--border); padding: 12px 18px; text-align: left; font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; cursor: pointer; user-select: none; transition: all .15s; font-family: 'Montserrat', sans-serif; }
     .comp-table th:hover { color: var(--navy); background: #e4e8eb; }
     .comp-table th.sorted { color: var(--green); background: var(--green-light); }
     .comp-table th.sorted::after { content: ' ↑'; }
     .comp-table th.sorted.desc::after { content: ' ↓'; }
-    .comp-table td { padding: 14px 18px; font-size: 12px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; font-variant-numeric: tabular-nums; }
+    .comp-table td { padding: 14px 18px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-variant-numeric: tabular-nums; }
+    .comp-table tr:nth-child(odd) td { background: rgba(1,58,82,.015); }
+    .comp-table tr:hover td { background: var(--navy-mid) !important; }
     .comp-table tr:last-child td { border-bottom: none; }
     .comp-table tr:hover td { background: var(--navy-mid); cursor: pointer; }
     .comp-table .td-r { text-align: right; }
@@ -144,7 +160,7 @@
     .client-list-metrics { display: flex; gap: 16px; color: var(--gray-600); font-size: 10px; font-weight: 600; }
 
     /* TREND COMPARISON */
-    .trend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 28px; }
+    .trend-grid { display: grid; grid-template-columns: 1fr; gap: 24px; padding: 28px; }
     .trend-box { background: var(--bg); border-radius: var(--r); padding: 20px; border: 1px solid var(--gray-100); }
     .trend-box-label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
 
@@ -154,13 +170,66 @@
     .loading-text { font-size: 13px; color: var(--gray-400); font-weight: 600; }
     .muted { color: var(--gray-400); }
     @keyframes spin   { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .header { padding: 0 16px; height: 56px; }
+      .header-pipe { display: none; }
+      .header-sub-text { display: none; }
+      .header-title { font-size: 14px; }
+      #last-updated { display: none; }
+      .btn-refresh { padding: 6px 10px; font-size: 10px; }
+      .btn-label-full { display: none; }
+      .btn-label-icon { display: inline !important; }
+      .filter-bar { padding: 8px 16px; top: 56px; flex-wrap: wrap; gap: 6px; }
+      .filter-spacer { display: none; }
+      .filter-bar .view-toggle { margin-left: auto; }
+      .filter-label { display: none; }
+      .sort-label { display: none; }
+      .sort-select { flex: 1; min-width: 110px; height: 34px; font-size: 11px; }
+      .btn-period { height: 34px; padding: 0 12px; font-size: 11px; }
+      .main { padding: 14px 14px 48px; }
+      .summary-bar { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+      .section { margin-bottom: 16px; }
+      .section-hdr { padding: 12px 16px; }
+      .section-hint { display: none; }
+      .strat-grid { padding: 12px; gap: 12px; }
+      .strat-card-header { padding: 14px 16px; }
+      .strat-name { font-size: 15px; }
+      .strat-client-count { font-size: 10px; }
+      .strat-metrics { grid-template-columns: repeat(3, 1fr); }
+      .strat-metric { padding: 12px 8px; }
+      .strat-metric-val { font-size: 16px; margin-bottom: 4px; }
+      .strat-metric-lbl { font-size: 8px; }
+      .strat-footer { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+      .strat-flags { flex-wrap: wrap; }
+      .client-list { padding: 0 14px; }
+      .client-list.open { padding: 10px 14px; }
+      .client-list-item { flex-direction: column; align-items: flex-start; gap: 5px; padding: 10px 0; }
+      .client-list-metrics { flex-wrap: wrap; gap: 6px; }
+      .trend-grid { padding: 10px; gap: 10px; grid-template-columns: 1fr 1fr; }
+      .trend-box { padding: 12px; }
+      .trend-box svg { width: 100% !important; height: auto; display: block; }
+      .trend-box-label { font-size: 11px; margin-bottom: 8px; }
+      .trend-legend { font-size: 8px !important; }
+      .comp-table th, .comp-table td { padding: 10px 12px; font-size: 11px; }
+    }
+    @media (max-width: 480px) {
+      .summary-bar { grid-template-columns: 1fr 1fr; }
+      .summary-value { font-size: 22px; }
+      .main { padding: 10px 10px 40px; }
+      .strat-grid { padding: 10px; gap: 10px; }
+      .strat-metric { padding: 12px 6px; }
+      .strat-metric-val { font-size: 15px; }
+      .strat-footer { gap: 6px; }
+      .section { margin-bottom: 12px; }
+    }
   </style>
 </head>
 <body>
 
 <header class="header">
   <div class="header-left">
-    <a class="btn-back" href="linkedin-dashboard.html">← Dashboard</a>
+    <a class="btn-back" href="index.html">←</a>
     <div class="header-pipe"></div>
     <div>
       <div class="header-title">Strategist Performance</div>
@@ -168,8 +237,8 @@
   </div>
   <div class="header-right">
     <span id="last-updated"></span>
-    <a href="https://docs.google.com/spreadsheets/d/1KI4t4JYPZNw5RbD2JTw7c4gdIhaV2fPZC9Y5RkGfGy4/edit" target="_blank" class="btn-refresh" style="text-decoration:none">↗ Hub Sheet</a>
-    <button class="btn-refresh" onclick="load()">↻ Refresh</button>
+    <a href="https://docs.google.com/spreadsheets/d/1KI4t4JYPZNw5RbD2JTw7c4gdIhaV2fPZC9Y5RkGfGy4/edit" target="_blank" class="btn-refresh" style="text-decoration:none"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg> <span class="btn-label-full">Hub </span>Sheet</a>
+    <button class="btn-refresh" onclick="load()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span class="btn-label-full">Refresh</span></button>
   </div>
 </header>
 
@@ -180,19 +249,10 @@
   <button class="btn-period" id="p-3m"  onclick="setPeriod('3m')">3M</button>
   <button class="btn-period active" id="p-all" onclick="setPeriod('all')">All Time</button>
   <div class="filter-spacer"></div>
-  <span class="sort-label">View</span>
-  <select class="sort-select" id="view-select" onchange="setView(this.value)">
-    <option value="cards">Cards</option>
-    <option value="table">Table</option>
-  </select>
-  <span class="sort-label" style="margin-left:8px">Sort by</span>
-  <select class="sort-select" id="sort-select" onchange="renderAll()">
-    <option value="meetings">Meetings</option>
-    <option value="connections">Connections</option>
-    <option value="acceptanceRate">Acceptance Rate</option>
-    <option value="responseRate">Response Rate</option>
-    <option value="clients">Client Count</option>
-  </select>
+  <div class="view-toggle">
+    <button class="view-toggle-btn active" id="v-cards" onclick="setView('cards')" title="Cards view"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></button>
+    <button class="view-toggle-btn" id="v-table" onclick="setView('table')" title="Table view"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg></button>
+  </div>
 </div>
 
 <div class="main" id="main">
@@ -211,6 +271,8 @@ let currentView  = 'cards';
 let sortKey      = 'meetings';
 let sortDir      = 'desc';
 let allClients   = [];
+let dailyByStrategist = {}; // strategistName -> [{date, connections, messages, meetings}]
+let stratChartInstances = [];
 
 function hubCsvUrl() {
   return `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Output&tq=select%20*%20limit%2010000`;
@@ -229,6 +291,7 @@ async function load() {
     allClients = rows.slice(1).map(parseRow).filter(c => c.name);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
     renderAll();
+    fetchDailyTab();
   } catch(e) {
     document.getElementById('main').innerHTML = `<div class="loading-state"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div class="loading-text" style="color:var(--red)">${e.message}</div></div>`;
   }
@@ -236,13 +299,21 @@ async function load() {
 
 function parseRow(r) {
   const pf = v => parseFloat(v) || 0;
-  const parsePeriod = offset => ({
-    connections: pf(r[offset]), messages: pf(r[offset+1]),
-    acceptanceRate: pf(r[offset+2]), responses: pf(r[offset+3]),
-    responseRate: pf(r[offset+4]), positive: pf(r[offset+5]),
-    positiveResponseRate: pf(r[offset+6]), meetings: pf(r[offset+7]),
-    positiveBookingRate: pf(r[offset+8]),
-  });
+  const parsePeriod = offset => {
+    const conn = pf(r[offset]);
+    const rawMsg = pf(r[offset+1]);
+    const msg = conn > 0 ? Math.min(rawMsg, conn * 2) : Math.min(rawMsg, 500000);
+    return {
+      connections: conn, messages: msg,
+      acceptanceRate: Math.min(pf(r[offset+2]), 100),
+      responses: pf(r[offset+3]),
+      responseRate: Math.min(pf(r[offset+4]), 100),
+      positive: pf(r[offset+5]),
+      positiveResponseRate: pf(r[offset+6]),
+      meetings: pf(r[offset+7]),
+      positiveBookingRate: pf(r[offset+8]),
+    };
+  };
   return {
     name:       (r[0]||'').trim(),
     strategist: (r[1]||'').trim(),
@@ -254,6 +325,40 @@ function parseRow(r) {
     error:      (r[44]||'').trim(),
     periods: { '2w': parsePeriod(7), '1m': parsePeriod(16), '3m': parsePeriod(25), 'all': parsePeriod(34) }
   };
+}
+
+async function fetchDailyTab() {
+  if (!hubSheetId) return;
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Daily&tq=select%20*%20limit%20100000`;
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const text = await res.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = Papa.parse(text, { skipEmptyLines: true }).data;
+    if (rows.length < 2) return;
+
+    const map = {};
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      const date = r[0], strat = r[2]; // col 2 = Strategist
+      if (!date || !strat) continue;
+      if (!map[strat]) map[strat] = {};
+      if (!map[strat][date]) map[strat][date] = { connections: 0, messages: 0, meetings: 0 };
+      map[strat][date].connections += parseFloat(r[3]) || 0;
+      map[strat][date].messages    += parseFloat(r[4]) || 0;
+      map[strat][date].meetings    += parseFloat(r[5]) || 0;
+    }
+
+    // Convert to sorted arrays
+    Object.keys(map).forEach(strat => {
+      dailyByStrategist[strat] = Object.entries(map[strat])
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, vals]) => ({ date, ...vals }));
+    });
+
+    renderTrends();
+  } catch(e) { /* silent */ }
 }
 
 // ── GROUP BY STRATEGIST ───────────────────────────────────────────────────────
@@ -281,16 +386,16 @@ function groupByStrategist(clients, period) {
 
     // Period trends (2W vs 1M vs 3M vs All)
     const periodTotals = ['2w','1m','3m','all'].map(p => {
-      let c=0, m=0, mt=0;
-      s.clients.forEach(cl => { const d=cl.periods[p]||{}; c+=d.connections||0; m+=d.messages||0; mt+=d.meetings||0; });
-      return { connections:c, messages:m, meetings:mt,
-               acceptanceRate: c>0?m/c*100:0, responseRate: m>0?0:0 };
+      let c=0, m=0, r=0, mt=0;
+      s.clients.forEach(cl => { const d=cl.periods[p]||{}; c+=d.connections||0; m+=d.messages||0; r+=d.responses||0; mt+=d.meetings||0; });
+      return { connections:c, messages:m, responses:r, meetings:mt,
+               acceptanceRate: c>0?m/c*100:0, responseRate: m>0?r/m*100:0 };
     });
 
-    const accRate  = totConn > 0 ? totMsg  / totConn * 100 : 0;
-    const respRate = totMsg  > 0 ? totResp / totMsg  * 100 : 0;
-    const bookRate = totPos  > 0 ? totMeet / totPos  * 100 : 0;
-    const posRate  = totResp > 0 ? totPos  / totResp * 100 : 0;
+    const accRate  = totConn > 0 ? Math.min(totMsg  / totConn * 100, 100) : 0;
+    const respRate = totMsg  > 0 ? Math.min(totResp / totMsg  * 100, 100) : 0;
+    const bookRate = totPos  > 0 ? Math.min(totMeet / totPos  * 100, 100) : 0;
+    const posRate  = totResp > 0 ? Math.min(totPos  / totResp * 100, 100) : 0;
 
     // Client-level flags
     let atRisk = 0, topPerf = 0, noMeetings = 0;
@@ -327,17 +432,14 @@ function setPeriod(p) {
 
 function setView(v) {
   currentView = v;
+  document.getElementById('v-cards').classList.toggle('active', v === 'cards');
+  document.getElementById('v-table').classList.toggle('active', v === 'table');
   renderAll();
 }
 
 // ── SORT ──────────────────────────────────────────────────────────────────────
 function sortStrats(list) {
-  const key = document.getElementById('sort-select').value;
-  return [...list].sort((a, b) => {
-    const av = key === 'clients' ? a.activeCount : (a[key] || 0);
-    const bv = key === 'clients' ? b.activeCount : (b[key] || 0);
-    return bv - av; // always desc for leaderboard
-  });
+  return [...list].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ── FORMAT HELPERS ────────────────────────────────────────────────────────────
@@ -355,10 +457,11 @@ function pctChange(from, to) {
 // ── RENDER MAIN ───────────────────────────────────────────────────────────────
 function renderAll() {
   const strats = sortStrats(groupByStrategist(allClients, activePeriod));
+  window._lastStrats = strats;
   renderSummary(strats);
   if (currentView === 'cards') renderCards(strats);
   else renderTable(strats);
-  renderTrendComparison(strats);
+  renderTrends(strats);
 }
 
 // ── SUMMARY BAR ───────────────────────────────────────────────────────────────
@@ -368,7 +471,8 @@ function renderSummary(strats) {
   const totalConn     = strats.reduce((a, s) => a + s.connections, 0);
   const totalMsg      = strats.reduce((a, s) => a + s.messages, 0);
   const topStrat      = strats[0];
-  const avgAccRate    = totalConn > 0 ? (totalMsg / totalConn * 100).toFixed(1) + '%' : '—';
+  const rawAcc        = totalConn > 0 ? Math.min(totalMsg / totalConn * 100, 100) : 0;
+  const avgAccRate    = totalConn > 0 ? rawAcc.toFixed(1) + '%' : '—';
 
   document.getElementById('main').innerHTML = `
     <div class="summary-bar">
@@ -397,6 +501,10 @@ function renderCards(strats) {
           <div>
             <div class="strat-name">${s.name}</div>
             <div class="strat-client-count">${s.activeCount} active · ${s.churnedCount} churned</div>
+          </div>
+          <div class="strat-header-stat">
+            <div class="strat-header-num">${s.clients.length}</div>
+            <div class="strat-header-lbl">clients <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="rgba(168,180,196,.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l3 3 3-3"/></svg></div>
           </div>
         </div>
         <div class="strat-metrics">
@@ -427,7 +535,6 @@ function renderCards(strats) {
         </div>
         <div class="strat-footer">
           <div class="strat-flags">${flagHtml || '<span class="muted" style="font-size:10px">No flags</span>'}</div>
-          <span style="font-size:10px;color:var(--gray-400);font-weight:600">▼ ${s.clients.length} clients</span>
         </div>
         <div class="client-list" id="sc-${i}">
           ${s.clients.map(c => {
@@ -509,7 +616,7 @@ function renderTable(strats) {
   document.getElementById('strat-view').innerHTML = `
     <div class="section" style="margin-bottom:20px">
       <div class="section-hdr">
-        <span class="section-title">📊 Strategist Comparison</span>
+        <span class="section-title">Strategist Comparison</span>
         <span class="section-hint">Click a row to expand clients</span>
       </div>
       <div style="overflow-x:auto">
@@ -531,62 +638,116 @@ function renderTable(strats) {
 }
 
 // ── TREND COMPARISON CHARTS ───────────────────────────────────────────────────
-function renderTrendComparison(strats) {
-  const pLabels = ['2W','1M','3M','All'];
-  const colors  = ['#A8B4C4','#6B9AB8','#3b9fd4','#1EB683'];
+function renderTrends(strats) {
+  const section = document.getElementById('trend-section');
+  if (!section) return;
+  if (!strats) strats = window._lastStrats || [];
 
-  const makeChart = (title, valFn) => {
-    // Multi-series bar chart: each strategist gets a set of 4 period bars
-    const stratData = strats.slice(0, 6).map(s => ({
-      name: s.name.split(' ')[0], // first name only for space
-      vals: s.periodTotals.map(valFn),
-    }));
-    const allVals = stratData.flatMap(s => s.vals);
-    const maxV = Math.max(...allVals, 1);
+  // Destroy old chart instances
+  stratChartInstances.forEach(c => c.destroy());
+  stratChartInstances = [];
 
-    const bW = 10, gap = 3, groupGap = 14;
-    const groupW = 4 * (bW + gap) - gap;
-    const W = stratData.length * (groupW + groupGap) - groupGap;
-    const H = 70, padB = 28;
+  const hasDailyData = Object.keys(dailyByStrategist).length > 0;
 
-    const bars = stratData.map((s, gi) => {
-      const gx = gi * (groupW + groupGap);
-      const barsInGroup = s.vals.map((v, bi) => {
-        const bh = Math.max(2, Math.round(v / maxV * H));
-        const x  = gx + bi * (bW + gap);
-        return `<rect x="${x}" y="${H-bh}" width="${bW}" height="${bh}" fill="${colors[bi]}" rx="2"/>`;
-      }).join('');
-      const labelX = gx + groupW / 2;
-      return `${barsInGroup}<text x="${labelX}" y="${H+padB-4}" text-anchor="middle" font-size="8" fill="#8899a6" font-family="Montserrat,sans-serif" font-weight="600">${s.name}</text>`;
-    }).join('');
+  if (!hasDailyData) {
+    // Fall back to period bars (existing code)
+    section.innerHTML = '<div style="padding:24px 28px;font-size:12px;color:var(--gray-400)">Daily data not yet available — run the Apps Script to populate.</div>';
+    return;
+  }
 
-    // Legend
-    const legend = pLabels.map((l, i) =>
-      `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:9px;color:var(--gray-600);font-weight:600"><span style="display:inline-block;width:8px;height:8px;background:${colors[i]};border-radius:2px"></span>${l}</span>`
-    ).join('');
+  const metrics = [
+    { key: 'connections', label: 'Connections Sent', color: '#3b9fd4' },
+    { key: 'meetings',    label: 'Meetings Booked',  color: '#1EB683' },
+    { key: 'messages',    label: 'Messages Sent',    color: '#6B9AB8' },
+  ];
 
+  const COLORS = ['#1EB683','#3b9fd4','#6B9AB8','#A8B4C4'];
+
+  const chartBoxes = metrics.map((m, mi) => {
+    const canvasId = `strat-chart-${mi}`;
     return `
-      <div class="trend-box">
-        <div class="trend-box-label">${title}</div>
-        <div style="margin-bottom:10px">${legend}</div>
-        <svg width="${W}" height="${H+padB}" viewBox="0 0 ${W} ${H+padB}" style="overflow:visible;max-width:100%">${bars}</svg>
+      <div class="trend-box" style="background:#fff">
+        <div class="trend-box-label">${m.label}</div>
+        <canvas id="${canvasId}" height="180"></canvas>
       </div>`;
-  };
+  }).join('');
 
-  const section = `
-    <div class="section">
+  section.innerHTML = `
+    <div class="section" style="margin-top:0">
       <div class="section-hdr">
-        <span class="section-title">📈 Period Trends by Strategist</span>
-        <span class="section-hint">2W → 1M → 3M → All Time · Top 6 shown</span>
+        <span class="section-title">Daily Trends by Strategist</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">Last 90 days</span>
       </div>
-      <div class="trend-grid">
-        ${makeChart('Connections Sent', d => d.connections)}
-        ${makeChart('Meetings Booked', d => d.meetings)}
-        ${makeChart('Acceptance Rate', d => d.acceptanceRate)}
-      </div>
+      <div class="trend-grid" style="padding:20px 28px">${chartBoxes}</div>
     </div>`;
 
-  document.getElementById('trend-section').innerHTML = section;
+  // Get all unique dates across all strategists (last 90 days)
+  const cutoff = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
+  const allDates = [...new Set(
+    Object.values(dailyByStrategist).flatMap(arr => arr.map(d => d.date).filter(d => d >= cutoff))
+  )].sort();
+
+  const stratNames = Object.keys(dailyByStrategist);
+
+  metrics.forEach((m, mi) => {
+    const ctx = document.getElementById(`strat-chart-${mi}`);
+    if (!ctx) return;
+
+    const datasets = stratNames.map((name, si) => {
+      const dataMap = {};
+      (dailyByStrategist[name] || []).forEach(d => { dataMap[d.date] = d[m.key] || 0; });
+      return {
+        label: name,
+        data: allDates.map(d => dataMap[d] || 0),
+        borderColor: COLORS[si % COLORS.length],
+        backgroundColor: COLORS[si % COLORS.length] + '18',
+        borderWidth: 2,
+        pointRadius: allDates.length > 60 ? 0 : 2,
+        pointHoverRadius: 4,
+        tension: 0.35,
+        fill: false,
+      };
+    });
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: allDates.map(d => {
+          const dt = new Date(d + 'T00:00:00');
+          return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', \'' + String(dt.getFullYear()).slice(2);
+        }),
+        datasets
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { font: { size: 10, family: 'Montserrat' }, boxWidth: 10, padding: 12 }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(1,58,82,.95)',
+            titleColor: '#fff', bodyColor: 'rgba(255,255,255,.8)',
+            padding: 10, cornerRadius: 8,
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(1,58,82,.04)' },
+            ticks: { font: { size: 9, family: 'Montserrat' }, color: '#8899a6', maxTicksLimit: 12, maxRotation: 0 },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(1,58,82,.05)' },
+            ticks: { font: { size: 9, family: 'Montserrat' }, color: '#8899a6' },
+          },
+        },
+      }
+    });
+    stratChartInstances.push(chart);
+  });
 }
 
 // ── FLAGS PER STRATEGIST ──────────────────────────────────────────────────────
@@ -605,23 +766,23 @@ function buildStratFlags(s) {
 
   // Top performer (use all-time rates)
   if (s.acceptanceRate > 30 && s.responseRate > 20 && s.meetings > 5)
-    flags.push({t:'good', s:'⭐ Top performer'});
+    flags.push({t:'good', s:'Top performer'});
 
   // Churn risk clients
-  if (s.atRisk >= 2)      flags.push({t:'bad',  s:`🚨 ${s.atRisk} at risk`});
-  else if (s.atRisk === 1) flags.push({t:'warn', s:'⚠️ 1 at risk'});
+  if (s.atRisk >= 2)      flags.push({t:'bad',  s:`${s.atRisk} at risk`});
+  else if (s.atRisk === 1) flags.push({t:'warn', s:'1 at risk'});
 
   // Outreach momentum: compare most recent 2W to prior 2W across all clients
   if (prior2WConn > 20 && p2w.connections < prior2WConn * 0.5)
-    flags.push({t:'warn', s:'📉 Outreach slowing'});
+    flags.push({t:'warn', s:'Outreach slowing'});
   else if (prior2WConn > 10 && p2w.connections > prior2WConn * 1.4)
-    flags.push({t:'good', s:'🚀 Outreach up'});
+    flags.push({t:'good', s:'Outreach up'});
 
   // Meeting momentum: had meetings in prior 2W but not recent 2W
   if (prior2WMeet > 0 && p2w.meetings === 0)
-    flags.push({t:'warn', s:'⏸️ Meetings stalled'});
+    flags.push({t:'warn', s:'Meetings stalled'});
   else if (p2w.meetings > 0)
-    flags.push({t:'good', s:`📅 ${p2w.meetings} mtg this 2W`});
+    flags.push({t:'good', s:`${p2w.meetings} mtg this 2W`});
 
   // No meetings clients
   if (s.noMeetings > 0)
@@ -634,7 +795,21 @@ function buildStratFlags(s) {
   if (s.topPerf >= 3)
     flags.push({t:'good', s:`${s.topPerf} top clients`});
 
-  return flags.slice(0, 3);
+  // Daily-data based flags
+  const daily = dailyByStrategist[s.name] || [];
+  if (daily.length >= 14) {
+    const recent7  = daily.slice(-7).reduce((a,d) => a + d.connections, 0);
+    const prior7   = daily.slice(-14, -7).reduce((a,d) => a + d.connections, 0);
+    if (prior7 > 10 && recent7 < prior7 * 0.4)
+      flags.push({t:'warn', s:'Volume drop this week'});
+    else if (prior7 > 5 && recent7 > prior7 * 1.6)
+      flags.push({t:'good', s:'Volume surge this week'});
+    const recentMtg = daily.slice(-14).reduce((a,d) => a + d.meetings, 0);
+    if (recentMtg === 0 && s.meetings > 2)
+      flags.push({t:'warn', s:'No mtgs last 14 days'});
+  }
+
+  return flags.slice(0, 5);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

@@ -6,31 +6,38 @@
   <title>Client Detail — Uptown Creation</title>
   <link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/652e9dbbc7a19b06feb5076f_UN_Favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --navy: #013A52; --navy-dark: #012a3d; --navy-light: #edf3f6; --navy-mid: rgba(1,58,82,.06);
-      --green: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
+      --green: #1EB683; --green-500: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
       --gray-mid: #A8B4C4;
-      --white: #ffffff; --bg: #f0f3f5;
+      --white: #ffffff; --bg: #f4f6f8;
+      --surface-1: #ffffff;
+      --surface-2: #f7f9fb;
+      --border: rgba(1,58,82,.08);
       --gray-100: #e8ecef; --gray-200: #d4dade; --gray-400: #8899a6; --gray-600: #4d5f6b;
       --red: #e53e3e; --red-light: #fff0f0;
       --amber: #f59e0b; --amber-light: #fef3c7;
-      --r: 10px; --r-lg: 16px; --r-pill: 999px;
-      --shadow-xs: 0 1px 3px rgba(1,58,82,.06), 0 1px 2px rgba(1,58,82,.04);
-      --shadow-sm: 0 2px 8px rgba(1,58,82,.08), 0 1px 3px rgba(1,58,82,.05);
-      --shadow-md: 0 8px 24px rgba(1,58,82,.10), 0 2px 8px rgba(1,58,82,.06);
-      --shadow-lg: 0 20px 60px rgba(1,58,82,.18), 0 4px 16px rgba(1,58,82,.08);
+      --r: 12px; --r-lg: 18px; --r-pill: 999px;
+      --shadow-xs: 0 1px 4px rgba(1,58,82,.05), 0 0 0 1px rgba(1,58,82,.04);
+      --shadow-sm: 0 2px 12px rgba(1,58,82,.08);
+      --shadow-md: 0 8px 32px rgba(1,58,82,.10);
+      --shadow-lg: 0 24px 64px rgba(1,58,82,.16);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; line-height: 1.2; }
+    :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     /* HEADER */
-    .header { background: linear-gradient(135deg, #013A52 0%, #01526e 100%); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 66px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md); }
+    .header { background: rgba(1,58,82,.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(255,255,255,.06), var(--shadow-md); }
     .header-left { display: flex; align-items: center; gap: 16px; }
     .btn-back { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.8); padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer; font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; text-decoration: none; transition: all .2s; letter-spacing: .05em; text-transform: uppercase; }
     .btn-back:hover { background: rgba(255,255,255,.16); color: #fff; }
@@ -49,7 +56,7 @@
     .meta-chips-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .sheet-meta-link { font-size: 12px; font-weight: 700; color: #00b4d8; text-decoration: none; border: 1px solid #00b4d8; border-radius: 6px; padding: 5px 12px; white-space: nowrap; transition: background 0.15s; }
     .sheet-meta-link:hover { background: rgba(0,180,216,0.1); }
-    .meta-chip { display: flex; flex-direction: column; background: var(--white); border-radius: var(--r); padding: 10px 16px; box-shadow: var(--shadow-xs); border: 1px solid var(--gray-100); min-width: 110px; transition: box-shadow .2s, transform .2s; animation: fadeUp .4s ease both; }
+    .meta-chip { display: flex; flex-direction: column; background: var(--surface-1); border-radius: var(--r); padding: 10px 16px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); min-width: 110px; transition: box-shadow .2s, transform .2s; animation: fadeUp .4s ease both; }
     .meta-chip:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
     .meta-chip-label { font-size: 9px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px; }
     .meta-chip-value { font-size: 13px; font-weight: 700; color: var(--navy); }
@@ -58,7 +65,7 @@
     .badge-red { background: var(--red-light); color: var(--red); }
 
     /* SECTION */
-    .section { background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,.8); margin-bottom: 24px; overflow: hidden; animation: fadeUp .45s ease both; }
+    .section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; overflow: hidden; animation: fadeUp .45s ease both; }
     .section:nth-child(1) { animation-delay:  0ms; }
     .section:nth-child(2) { animation-delay: 80ms; }
     .section:nth-child(3) { animation-delay:160ms; }
@@ -86,7 +93,7 @@
     .pct-flat { background: var(--gray-100); color: var(--gray-400); }
 
     /* TREND CHARTS GRID */
-    .trend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .trend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .trend-box { background: var(--bg); border-radius: var(--r); padding: 16px; border: 1px solid var(--gray-100); transition: box-shadow .2s, transform .2s; }
     .trend-box:hover { box-shadow: var(--shadow-sm); transform: translateY(-2px); background: var(--white); }
     .trend-box-label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
@@ -113,20 +120,78 @@
     .error-msg { font-size: 13px; color: var(--red); font-weight: 600; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .muted { color: var(--gray-400); }
+
+    /* SUMMARY VALUE TYPOGRAPHY */
+    .trend-box-main { font-variant-numeric: tabular-nums; font-family: 'Montserrat', sans-serif; }
+
+    @media (max-width: 768px) {
+      .header { padding: 0 16px; height: 56px; }
+      .header-pipe { display: none; }
+      .client-header-name { font-size: 14px; }
+      #last-updated { display: none; }
+      .btn-refresh { padding: 6px 10px; font-size: 10px; }
+      .btn-label-full { display: none; }
+      .btn-label-icon { display: inline !important; }
+      .main { padding: 14px 14px 48px; }
+      .meta-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .meta-chips-left { gap: 8px; flex-wrap: wrap; }
+      .meta-chip { min-width: 90px; padding: 8px 12px; }
+      .sheet-meta-link { text-align: center; padding: 8px 16px; }
+      .section { margin-bottom: 16px; }
+      .section-hdr { padding: 12px 16px; flex-wrap: wrap; gap: 4px; }
+      .section-hdr > span:last-child { display: none; }
+      .section-body { padding: 12px 14px; overflow-x: auto; }
+      .period-table { min-width: 440px; }
+      .period-table th, .period-table td { padding: 8px 10px; font-size: 11px; }
+      .pct-change { padding: 1px 4px; font-size: 9px; margin-left: 3px; }
+      .trend-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .trend-box { padding: 12px; }
+      .trend-box-main { font-size: 20px; }
+      .trend-box svg { width: 100% !important; height: auto; display: block; overflow: visible; }
+      .insight-item { padding: 10px 12px; gap: 10px; }
+      .insight-desc { font-size: 11px; }
+    }
+    @media (max-width: 480px) {
+      .client-header-name { font-size: 13px; }
+      .main { padding: 10px 10px 40px; }
+      .meta-chips-left { display: grid; grid-template-columns: 1fr 1fr; }
+      .meta-chip { min-width: unset; }
+      .section-hdr { padding: 10px 12px; }
+      .section-body { padding: 10px 12px; }
+      .trend-grid { grid-template-columns: 1fr 1fr; }
+      .trend-box-main { font-size: 16px; }
+      .trend-box-sub { font-size: 10px; }
+      .insight-icon { font-size: 15px; }
+      .insight-title { font-size: 11px; }
+    }
+    /* DAILY CHART */
+    .daily-section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; animation: fadeUp .5s ease both; animation-delay: .1s; }
+    .daily-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 22px 0; }
+    .daily-period-pills { display: flex; gap: 6px; }
+    .daily-pill { background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 5px 13px; font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gray-600); cursor: pointer; transition: all .18s; letter-spacing: .04em; }
+    .daily-pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .daily-pill:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    .daily-metric-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+    .daily-toggle { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: var(--gray-600); user-select: none; }
+    .daily-toggle input { accent-color: var(--green); width: 13px; height: 13px; cursor: pointer; }
+    .daily-chart-wrap { padding: 12px 22px 20px; position: relative; }
+    .daily-chart-wrap canvas { max-height: 260px; }
+    .daily-empty { text-align: center; padding: 48px 24px; color: var(--gray-400); font-size: 13px; font-weight: 600; }
+    .daily-loading { text-align: center; padding: 36px 24px; color: var(--gray-400); font-size: 12px; }
   </style>
 </head>
 <body>
 
 <header class="header">
   <div class="header-left">
-    <a class="btn-back" href="linkedin-dashboard.html">← Dashboard</a>
+    <a class="btn-back" href="index.html">←</a>
     <div class="header-pipe"></div>
     <span class="client-header-name" id="header-name">Loading…</span>
   </div>
   <div class="header-right">
     <span id="last-updated"></span>
-    <a id="sheet-link" href="#" target="_blank" class="btn-refresh" style="display:none;text-decoration:none">↗ Open Sheet</a>
-    <button class="btn-refresh" onclick="loadClient()">↻ Refresh</button>
+    <a id="sheet-link" href="#" target="_blank" class="btn-refresh" style="display:none;text-decoration:none"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg> <span class="btn-label-full">Open </span>Sheet</a>
+    <button class="btn-refresh" onclick="loadClient()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span class="btn-label-full">Refresh</span></button>
   </div>
 </header>
 
@@ -211,13 +276,16 @@ function parseRow(r) {
     endDate:     r[4]||'',
     status:      r[5]||'Active',
     sheetUrl:    r[6]||'',
-    lastUpdated: r[43]||'',
-    error:       (r[44]||'').trim(),
+    companyName:  r[7]||'',
+    service:      r[8]||'',
+    messagingUrl: r[9]||'',
+    contentUrl:   r[10]||'',
+    lastUpdated:  r[74]||'',
+    error:       (r[75]||'').trim(),
     periods: {
-      '2w':  parsePeriod(7),
-      '1m':  parsePeriod(16),
-      '3m':  parsePeriod(25),
-      'all': parsePeriod(34),
+      '1w':  parsePeriod(11), '2w':  parsePeriod(20), '3w':  parsePeriod(29),
+      '1m':  parsePeriod(38), '2m':  parsePeriod(47), '3m':  parsePeriod(56),
+      'all': parsePeriod(65),
     }
   };
 }
@@ -238,7 +306,7 @@ function renderError(msg) {
       <div class="error-icon">⚠️</div>
       <div class="error-msg">${msg}</div>
       <p style="margin-top:12px;font-size:12px;color:var(--gray-400)">
-        <a href="linkedin-dashboard.html" style="color:var(--green)">← Back to dashboard</a>
+        <a href="index.html" style="color:var(--green)">← Back to dashboard</a>
       </p>
     </div>`;
   document.getElementById('header-name').textContent = 'Error';
@@ -247,7 +315,9 @@ function renderError(msg) {
 // ── RENDER: FULL PAGE ─────────────────────────────────────────────────────────
 function renderPage(c) {
   document.title = `${c.name} — Uptown Creation`;
-  document.getElementById('header-name').textContent = c.name;
+  document.getElementById('header-name').innerHTML = c.companyName
+    ? `${c.name} <span style="font-weight:500;font-size:12px;color:rgba(255,255,255,.5);margin-left:8px">${c.companyName}</span>`
+    : c.name;
   // Show sheet link from parsed data if not already set via URL param
   if (c.sheetUrl && !sheetParam) {
     const lnk = document.getElementById('sheet-link');
@@ -263,6 +333,7 @@ function renderPage(c) {
   // Meta chips
   const metaChips = [
     ['Status', statusBadge],
+    c.service    ? ['Service', c.service]        : null,
     c.strategist ? ['Strategist', c.strategist] : null,
     c.cam        ? ['CAM', c.cam]               : null,
     c.startDate  ? ['Start Date', c.startDate]  : null,
@@ -271,17 +342,26 @@ function renderPage(c) {
     `<div class="meta-chip"><span class="meta-chip-label">${label}</span><span class="meta-chip-value">${val}</span></div>`
   ).join('');
 
-  const sheetBtn = c.sheetUrl
-    ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">↗ Open Sheet</a>`
-    : '';
+  const linkIcon = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>`;
+  const sheetBtn = c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Open Sheet</a>` : '';
+  const msgBtn   = c.messagingUrl ? `<a href="${c.messagingUrl}" target="_blank" class="sheet-meta-link">${linkIcon} See Messaging</a>` : '';
+  const contentBtn = c.contentUrl ? `<a href="${c.contentUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Review Content</a>` : '';
+  const metaLinks = [sheetBtn, msgBtn, contentBtn].filter(Boolean).join('');
 
   const html = `
-    <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div>${sheetBtn}</div>
+    <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${metaLinks}</div></div>
     ${renderPeriodTable(c.periods)}
-    ${renderTrendCharts(c.periods)}
-    ${renderInsights(c.periods)}`;
+    ${renderInsights(c.periods)}
+    <div id="daily-chart-section"></div>
+    <div id="daily-chart-below"></div>
+    ${renderTrendCharts(c.periods)}`;
 
   document.getElementById('main').innerHTML = html;
+
+  // Kick off daily chart load if we have a sheet URL
+  const idM = sheetParam ? decodeURIComponent(sheetParam).match(/\/d\/([a-zA-Z0-9-_]+)/) : null;
+  if (idM) loadDailyChart(idM[1]);
+  else { document.getElementById('daily-chart-section').style.display = 'none'; document.getElementById('daily-chart-below').style.display = 'none'; }
 }
 
 // ── PERIOD COMPARISON TABLE ───────────────────────────────────────────────────
@@ -296,8 +376,8 @@ const METRIC_DEFS = [
   { key:'meetings',             label:'Meetings Booked',     isRate:false },
   { key:'positiveBookingRate',  label:'Booking Rate',        isRate:true  },
 ];
-const P_KEYS   = ['2w','1m','3m','all'];
-const P_LABELS = { '2w':'2 Weeks','1m':'1 Month','3m':'3 Months','all':'All Time' };
+const P_KEYS   = ['1w','2w','3w','1m','2m','3m','all'];
+const P_LABELS = { '1w':'1 Week','2w':'2 Weeks','3w':'3 Weeks','1m':'1 Month','2m':'2 Months','3m':'3 Months','all':'All Time' };
 
 function fmtVal(v, isRate) {
   if (!v || v === 0) return '<span class="muted">—</span>';
@@ -324,47 +404,37 @@ function rollingBadge(pct) {
 }
 
 function renderPeriodTable(periods) {
-  const p2w = periods['2w'] || {}, p1m = periods['1m'] || {};
-  const p3m = periods['3m'] || {}, all = periods['all'] || {};
+  const pVals = {};
+  P_KEYS.forEach(k => pVals[k] = periods[k] || {});
 
   const rows = METRIC_DEFS.map(m => {
-    const v2w = p2w[m.key] || 0, v1m = p1m[m.key] || 0;
-    const v3m = p3m[m.key] || 0, vAll = all[m.key] || 0;
-    const vals = [v2w, v1m, v3m, vAll];
+    const vals = P_KEYS.map(k => pVals[k][m.key] || 0);
     const maxV = Math.max(...vals);
 
-    let badge2w = '', badge1m = '';
-
-    if (m.isRate) {
-      // Rate metrics: direct comparison is meaningful across rolling windows
-      // 2W rate vs 1M rate → is recent performance better than the monthly average?
-      if (v1m > 0) badge2w = rollingBadge(((v2w - v1m) / v1m) * 100);
-      // 1M rate vs 3M rate → is this month better than 3-month average?
-      if (v3m > 0) badge1m = rollingBadge(((v1m - v3m) / v3m) * 100);
-    } else {
-      // Count metrics: compare activity in each window against prior equivalent window
-      // prior2W = 1M - 2W (the 2 weeks before the most recent 2 weeks)
-      const prior2W = v1m - v2w;
-      if (prior2W > 0) badge2w = rollingBadge(((v2w - prior2W) / prior2W) * 100);
-      // priorMonthlyRate = (3M - 1M) / 2 per month — compare 1M vs that pace
-      const priorMonthlyRate = v3m > v1m ? (v3m - v1m) / 2 : 0;
-      if (priorMonthlyRate > 0) badge1m = rollingBadge(((v1m - priorMonthlyRate) / priorMonthlyRate) * 100);
-    }
+    // Compute badges: compare each period to the next longer one
+    const badges = P_KEYS.map((k, i) => {
+      if (i >= P_KEYS.length - 1) return ''; // no badge for All Time
+      const cur = vals[i], next = vals[i + 1];
+      if (m.isRate) {
+        return next > 0 ? rollingBadge(((cur - next) / next) * 100) : '';
+      } else {
+        // For counts, compare against prior equivalent window
+        const prior = next - cur;
+        return prior > 0 ? rollingBadge(((cur - prior) / prior) * 100) : '';
+      }
+    });
 
     const bestCls = (v) => v === maxV && v > 0 ? 'val-best' : '';
     return `<tr>
       <td>${m.label}</td>
-      <td class="${bestCls(v2w)}">${fmtVal(v2w, m.isRate)}${badge2w}</td>
-      <td class="${bestCls(v1m)}">${fmtVal(v1m, m.isRate)}${badge1m}</td>
-      <td class="${bestCls(v3m)}">${fmtVal(v3m, m.isRate)}</td>
-      <td class="${bestCls(vAll)}">${fmtVal(vAll, m.isRate)}</td>
+      ${vals.map((v, i) => `<td class="${bestCls(v)}">${fmtVal(v, m.isRate)}${badges[i]}</td>`).join('')}
     </tr>`;
   }).join('');
 
   return `
     <div class="section">
       <div class="section-hdr">
-        <span class="section-title">📊 Period Comparison</span>
+        <span class="section-title">Period Comparison</span>
         <span style="font-size:10px;color:var(--gray-400);font-weight:600">Rolling windows · ↑↓ on counts = vs prior equivalent window · ↑↓ on rates = vs longer window avg</span>
       </div>
       <div style="overflow-x:auto">
@@ -379,14 +449,31 @@ function renderPeriodTable(periods) {
     </div>`;
 }
 
+// ── ICON SVGs (replaces emoji for cross-platform consistency) ─────────────────
+function iconSvg(key) {
+  const a = 'width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  const icons = {
+    crit:  `<svg ${a} stroke="#e53e3e" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11v.5"/></svg>`,
+    warn:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 2.5 14 13H2z"/><path d="M8 7v2.5M8 11.5v.5"/></svg>`,
+    good:  `<svg ${a} stroke="#1EB683" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M5 8l2 2.5 4-4"/></svg>`,
+    star:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 2l1.6 3.3 3.6.5-2.6 2.5.6 3.6L8 10.1l-3.2 1.8.6-3.6-2.6-2.5 3.6-.5z"/></svg>`,
+    up:    `<svg ${a} stroke="#1EB683" stroke-width="1.5"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>`,
+    down:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>`,
+    pause: `<svg ${a} stroke="#d97706" stroke-width="1.5"><rect x="4" y="3.5" width="2.5" height="9" rx="1"/><rect x="9.5" y="3.5" width="2.5" height="9" rx="1"/></svg>`,
+    cal:   `<svg ${a} stroke="#1EB683" stroke-width="1.5"><rect x="2" y="4" width="12" height="10" rx="1.5"/><path d="M2 7.5h12M5.5 2v3M10.5 2v3"/></svg>`,
+    tip:   `<svg ${a} stroke="#3b9fd4" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v.2M8 7.5v3.5"/></svg>`,
+  };
+  return icons[key] || icons.good;
+}
+
 // ── TREND BAR CHARTS ──────────────────────────────────────────────────────────
 function barChartSVG(periods, key, isRate) {
   const vals   = P_KEYS.map(k => (periods[k] && periods[k][key]) || 0);
-  const labels = ['2W','1M','3M','All'];
+  const labels = P_KEYS.map(k => P_LABELS[k]);
   const max    = Math.max(...vals, 1);
-  const bW = 34, gap = 10, H = 72, padB = 22;
+  const bW = 38, gap = 10, H = 72, padB = 22;
   const W  = P_KEYS.length * (bW + gap) - gap;
-  const colors = ['#A8B4C4','#6B9AB8','#3b9fd4','#1EB683'];
+  const colors = ['#cbd5e0','#A8B4C4','#8899a6','#6B9AB8','#3b9fd4','#013A52','#1EB683'];
 
   const bars = vals.map((v, i) => {
     const bh  = Math.max(3, Math.round(v / max * H));
@@ -399,7 +486,7 @@ function barChartSVG(periods, key, isRate) {
       <text x="${x+bW/2}" y="${H+padB-4}" text-anchor="middle" font-size="9" fill="#8899a6" font-family="Montserrat,sans-serif" font-weight="600">${labels[i]}</text>`;
   }).join('');
 
-  return `<svg width="${W}" height="${H+padB}" viewBox="0 0 ${W} ${H+padB}" style="overflow:visible">${bars}</svg>`;
+  return `<svg width="100%" height="${H+padB}" viewBox="0 0 ${W} ${H+padB}" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block">${bars}</svg>`;
 }
 
 const TREND_METRICS = [
@@ -437,8 +524,8 @@ function renderTrendCharts(periods) {
   return `
     <div class="section">
       <div class="section-hdr">
-        <span class="section-title">📈 Trends by Period</span>
-        <span style="font-size:10px;color:var(--gray-400);font-weight:600">2W → 1M → 3M → All Time</span>
+        <span class="section-title">Trends by Period</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">1W → 2W → 3W → 1M → 2M → 3M → All Time</span>
       </div>
       <div class="section-body">
         <div class="trend-grid">${boxes}</div>
@@ -466,36 +553,36 @@ function buildInsights(periods) {
   // ── Overall rate benchmarks (use All Time for stable sample) ─────────────
   if (all.connections > 100) {
     if (all.acceptanceRate < 14)
-      add('bad',  '🚨', 'Very low acceptance rate',     `${all.acceptanceRate.toFixed(1)}% all-time — well below 18% target. Profile or messaging needs review.`);
+      add('bad',  'crit', 'Very low acceptance rate',     `${all.acceptanceRate.toFixed(1)}% all-time — well below 18% target. Profile or messaging needs review.`);
     else if (all.acceptanceRate < 18)
-      add('warn', '⚠️', 'Below-target acceptance rate',  `${all.acceptanceRate.toFixed(1)}% all-time — target is 18%+.`);
+      add('warn', 'warn', 'Below-target acceptance rate',  `${all.acceptanceRate.toFixed(1)}% all-time — target is 18%+.`);
     else if (all.acceptanceRate > 35)
-      add('good', '🎯', 'Exceptional acceptance rate',   `${all.acceptanceRate.toFixed(1)}% — well above benchmark.`);
+      add('good', 'star', 'Exceptional acceptance rate',   `${all.acceptanceRate.toFixed(1)}% — well above benchmark.`);
     else if (all.acceptanceRate > 28)
-      add('good', '✅', 'Strong acceptance rate',         `${all.acceptanceRate.toFixed(1)}% — above 28% benchmark.`);
+      add('good', 'good', 'Strong acceptance rate',         `${all.acceptanceRate.toFixed(1)}% — above 28% benchmark.`);
   }
 
   if (all.messages > 50) {
     if (all.responseRate < 10)
-      add('bad',  '🚨', 'Very low response rate',        `${all.responseRate.toFixed(1)}% — target is 15%+. Message copy needs a rewrite.`);
+      add('bad',  'crit', 'Very low response rate',        `${all.responseRate.toFixed(1)}% — target is 15%+. Message copy needs a rewrite.`);
     else if (all.responseRate < 15)
-      add('warn', '⚠️', 'Below-target response rate',    `${all.responseRate.toFixed(1)}% — try personalizing the opening line or changing the CTA.`);
+      add('warn', 'warn', 'Below-target response rate',    `${all.responseRate.toFixed(1)}% — try personalizing the opening line or changing the CTA.`);
     else if (all.responseRate > 28)
-      add('good', '✅', 'Strong response rate',           `${all.responseRate.toFixed(1)}% — top-tier engagement.`);
+      add('good', 'good', 'Strong response rate',           `${all.responseRate.toFixed(1)}% — top-tier engagement.`);
   }
 
   // ── Meetings ──────────────────────────────────────────────────────────────
   if (all.connections > 300 && all.meetings === 0)
-    add('bad', '🚨', 'No meetings booked', `${all.connections.toLocaleString()} connections with zero meetings — escalate immediately.`);
+    add('bad', 'crit', 'No meetings booked', `${all.connections.toLocaleString()} connections with zero meetings — escalate immediately.`);
   else if (all.meetings > 0) {
     if (all.positiveBookingRate > 60)
-      add('good', '🏆', 'Outstanding booking rate', `${all.positiveBookingRate.toFixed(1)}% of positives convert to meetings.`);
+      add('good', 'star', 'Outstanding booking rate', `${all.positiveBookingRate.toFixed(1)}% of positives convert to meetings.`);
     else if (all.positiveBookingRate < 20 && all.positive > 10)
-      add('warn', '⚠️', 'Low booking rate', `Only ${all.positiveBookingRate.toFixed(1)}% of positives book — follow-up sequence may need work.`);
+      add('warn', 'warn', 'Low booking rate', `Only ${all.positiveBookingRate.toFixed(1)}% of positives book — follow-up sequence may need work.`);
   }
 
   if (all.responses > 20 && all.positiveResponseRate < 25)
-    add('warn', '📉', 'Low positive rate', `${all.positiveResponseRate.toFixed(1)}% of responses are positive — objection handling may need work.`);
+    add('warn', 'down', 'Low positive rate', `${all.positiveResponseRate.toFixed(1)}% of responses are positive — objection handling may need work.`);
 
   // ── Momentum: compare most recent 2W against the prior 2W ────────────────
   // prior2W = 1M - 2W (the 2 weeks immediately before the most recent 2 weeks)
@@ -505,25 +592,25 @@ function buildInsights(periods) {
   if (prior2WConn > 0) {
     const connPct = ((p2w.connections - prior2WConn) / prior2WConn) * 100;
     if (connPct < -30)
-      add('warn', '📉', 'Outreach slowing down', `Most recent 2W (${p2w.connections} connections) is ${Math.abs(connPct).toFixed(0)}% below the prior 2 weeks (${Math.round(prior2WConn)}).`);
+      add('warn', 'down', 'Outreach slowing down', `Most recent 2W (${p2w.connections} connections) is ${Math.abs(connPct).toFixed(0)}% below the prior 2 weeks (${Math.round(prior2WConn)}).`);
     else if (connPct > 30)
-      add('good', '🚀', 'Outreach accelerating', `Most recent 2W (${p2w.connections} connections) is ${connPct.toFixed(0)}% ahead of the prior 2 weeks (${Math.round(prior2WConn)}).`);
+      add('good', 'up', 'Outreach accelerating', `Most recent 2W (${p2w.connections} connections) is ${connPct.toFixed(0)}% ahead of the prior 2 weeks (${Math.round(prior2WConn)}).`);
   }
 
   // Meetings momentum: compare most recent 2W meetings vs prior 2W meetings
   if (prior2WMeet > 0 && p2w.meetings === 0)
-    add('warn', '⏸️', 'Meetings stalled recently', `Had ${Math.round(prior2WMeet)} meeting(s) in the prior 2 weeks but none in the most recent 2 weeks.`);
+    add('warn', 'pause', 'Meetings stalled recently', `Had ${Math.round(prior2WMeet)} meeting(s) in the prior 2 weeks but none in the most recent 2 weeks.`);
   else if (p2w.meetings > 0 && prior2WMeet === 0 && p2w.meetings > 0)
-    add('good', '📅', 'Meetings picked up', `${p2w.meetings} meeting${p2w.meetings!==1?'s':''} in the most recent 2 weeks — up from 0 in the prior 2 weeks.`);
+    add('good', 'cal', 'Meetings picked up', `${p2w.meetings} meeting${p2w.meetings!==1?'s':''} in the most recent 2 weeks — up from 0 in the prior 2 weeks.`);
   else if (p2w.meetings > 0)
-    add('good', '📅', 'Active meetings recently', `${p2w.meetings} meeting${p2w.meetings!==1?'s':''} booked in the most recent 2 weeks.`);
+    add('good', 'cal', 'Active meetings recently', `${p2w.meetings} meeting${p2w.meetings!==1?'s':''} booked in the most recent 2 weeks.`);
 
   // ── Rate trend: 2W rate vs 1M rate (direct comparison valid for rates) ───
   if (p2w.connections > 20 && p1m.connections > 20) {
     if (p2w.acceptanceRate > p1m.acceptanceRate * 1.15)
-      add('good', '📈', 'Acceptance rate improving', `Most recent 2W (${p2w.acceptanceRate.toFixed(1)}%) is beating the 1M average (${p1m.acceptanceRate.toFixed(1)}%).`);
+      add('good', 'up', 'Acceptance rate improving', `Most recent 2W (${p2w.acceptanceRate.toFixed(1)}%) is beating the 1M average (${p1m.acceptanceRate.toFixed(1)}%).`);
     else if (p2w.acceptanceRate < p1m.acceptanceRate * 0.8)
-      add('warn', '📉', 'Acceptance rate declining', `Most recent 2W (${p2w.acceptanceRate.toFixed(1)}%) is below the 1M average (${p1m.acceptanceRate.toFixed(1)}%) — may need targeting refresh.`);
+      add('warn', 'down', 'Acceptance rate declining', `Most recent 2W (${p2w.acceptanceRate.toFixed(1)}%) is below the 1M average (${p1m.acceptanceRate.toFixed(1)}%) — may need targeting refresh.`);
   }
 
   // ── Monthly pace check: 1M vs prior monthly rate ─────────────────────────
@@ -531,13 +618,13 @@ function buildInsights(periods) {
   if (priorMoConn > 0) {
     const moPct = ((p1m.connections - priorMoConn) / priorMoConn) * 100;
     if (moPct < -35)
-      add('warn', '📉', 'Monthly outreach declining', `This month (${p1m.connections} connections) is ${Math.abs(moPct).toFixed(0)}% below the prior monthly pace (${Math.round(priorMoConn)}/mo).`);
+      add('warn', 'down', 'Monthly outreach declining', `This month (${p1m.connections} connections) is ${Math.abs(moPct).toFixed(0)}% below the prior monthly pace (${Math.round(priorMoConn)}/mo).`);
     else if (moPct > 35)
-      add('good', '📈', 'Monthly outreach growing', `This month (${p1m.connections} connections) is ${moPct.toFixed(0)}% above the prior monthly pace (${Math.round(priorMoConn)}/mo).`);
+      add('good', 'up', 'Monthly outreach growing', `This month (${p1m.connections} connections) is ${moPct.toFixed(0)}% above the prior monthly pace (${Math.round(priorMoConn)}/mo).`);
   }
 
   if (flags.length === 0)
-    add('good', '💚', 'Campaign looks healthy', 'No significant issues detected across any period.');
+    add('good', 'tip', 'Campaign looks healthy', 'No significant issues detected across any period.');
 
   return flags;
 }
@@ -546,7 +633,7 @@ function renderInsights(periods) {
   const flags = buildInsights(periods);
   const items = flags.map(f => `
     <div class="insight-item ${f.t}">
-      <span class="insight-icon">${f.icon}</span>
+      <span class="insight-icon">${iconSvg(f.icon)}</span>
       <div>
         <div class="insight-title">${f.title}</div>
         ${f.desc ? `<div class="insight-desc">${f.desc}</div>` : ''}
@@ -556,16 +643,346 @@ function renderInsights(periods) {
   return `
     <div class="section">
       <div class="section-hdr">
-        <span class="section-title">💡 Insights & Flags</span>
+        <span class="section-title">Insights & Flags</span>
         <span style="font-size:10px;color:var(--gray-400);font-weight:600">${flags.length} flag${flags.length!==1?'s':''} detected</span>
       </div>
       <div class="section-body">${items}</div>
     </div>`;
 }
 
+// ── DAILY CHART ───────────────────────────────────────────────────────────────
+let _dailyAllData  = null; // full parsed time series
+let _dailyDays     = 90;   // current filter
+let _dailyMetrics  = ['responses','positive','meetings']; // active metric keys
+let _chartInstance = null;
+let _cumChartInstance = null;
+let _cumDays    = 90;
+let _cumMetrics = ['responses','positive','meetings'];
+
+const DAILY_METRIC_OPTS = [
+  { key:'connections', label:'Connections',        color:'#3b9fd4' },
+  { key:'messages',    label:'Messages',           color:'#6B9AB8' },
+  { key:'responses',   label:'Responses',          color:'#A8B4C4' },
+  { key:'positive',    label:'Positive Responses', color:'#d97706' },
+  { key:'meetings',    label:'Meetings',           color:'#1EB683' },
+];
+
+async function loadDailyChart(clientSheetId) {
+  const el = document.getElementById('daily-chart-section');
+  el.innerHTML = `
+    <div class="daily-section">
+      <div class="section-hdr" style="border-bottom:1px solid var(--border)">
+        <span class="section-title">Daily Activity</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">Fetching from sheet…</span>
+      </div>
+      <div class="daily-loading">Loading daily data…</div>
+    </div>`;
+
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${clientSheetId}/gviz/tq?tqx=out:csv&sheet=Data%20Tracking&tq=select%20*%20limit%2010000`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (text.trim().startsWith('<')) throw new Error('Sheet not public');
+
+    const rows = Papa.parse(text, { skipEmptyLines: true }).data;
+    _dailyAllData = parseDailyRows(rows);
+
+    if (!_dailyAllData || _dailyAllData.dates.length < 3) {
+      el.innerHTML = '';
+      return; // No daily data — hide section silently
+    }
+
+    renderCumulativeSection(el);
+    buildCumulativeChart();
+    renderDailySection(document.getElementById('daily-chart-below'));
+    buildDailyChart();
+  } catch(e) {
+    el.innerHTML = ''; // Hide on error — don't disrupt main content
+  }
+}
+
+function parseDailyRows(rows) {
+  if (!rows || rows.length < 2) return null;
+  const header = rows[0];
+
+  // Find columns with date-like headers
+  const dateCols = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tenYearsAgo = new Date(today); tenYearsAgo.setFullYear(today.getFullYear() - 10);
+  const tomorrow    = new Date(today); tomorrow.setDate(today.getDate() + 1);
+
+  for (let c = 1; c < header.length; c++) {
+    const v = header[c]; if (!v) continue;
+    const d = new Date(v);
+    if (!isNaN(d.getTime()) && d >= tenYearsAgo && d <= tomorrow) {
+      dateCols.push({ col: c, date: new Date(d.setHours(0,0,0,0)) });
+    }
+  }
+  if (dateCols.length < 3) return null;
+
+  // Find metric rows
+  const findRow = (kw, ex) => rows.find(r => {
+    const l = String(r[0]||'').toLowerCase().trim();
+    return l.includes(kw) && !(ex||[]).some(x => l.includes(x));
+  });
+  const connRow = findRow('connection request');
+  const msgRow  = findRow('initial message');
+  const respRow = findRow('linkedin response', ['rate']);
+  const meetRow = findRow('meeting', ['rate']);
+  if (!connRow && !msgRow) return null;
+
+  const gv = (row, col) => row ? (parseFloat(String(row[col]||'').replace(/[%,$\s,]/g,'')) || 0) : 0;
+
+  // Sort by date ascending
+  dateCols.sort((a,b) => a.date - b.date);
+
+  const posRow  = rows.find(r => { const l = String(r[0]||'').toLowerCase().trim(); return l === 'positive' || l === 'positive responses'; });
+
+  const series = { connections:[], messages:[], responses:[], positive:[], meetings:[] };
+  const dates  = [];
+  for (const { col, date } of dateCols) {
+    dates.push(date);
+    series.connections.push(gv(connRow, col));
+    series.messages.push(gv(msgRow, col));
+    series.responses.push(gv(respRow, col));
+    series.positive.push(gv(posRow, col));
+    series.meetings.push(gv(meetRow, col));
+  }
+  return { dates, series };
+}
+
+function renderCumulativeSection(el) {
+  const pills = [
+    { label:'1W',  days:7 },
+    { label:'2W',  days:14 },
+    { label:'3W',  days:21 },
+    { label:'1M',  days:30 },
+    { label:'2M',  days:60 },
+    { label:'3M',  days:90 },
+    { label:'1Y',  days:365 },
+    { label:'All', days:0 },
+  ].map(p => `<button class="daily-pill cum-pill${_cumDays===p.days?' active':''}" onclick="setCumPeriod(${p.days})">${p.label}</button>`).join('');
+
+  const toggles = DAILY_METRIC_OPTS.map(m =>
+    `<label class="daily-toggle">
+      <input type="checkbox" value="${m.key}" ${_cumMetrics.includes(m.key)?'checked':''}
+        onchange="toggleCumMetric('${m.key}',this.checked)">
+      <span style="color:${m.color}">${m.label}</span>
+    </label>`).join('');
+
+  el.innerHTML = `
+    <div class="daily-section">
+      <div class="section-hdr" style="border-bottom:1px solid var(--border)">
+        <span class="section-title">Activity</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">Cumulative over time</span>
+      </div>
+      <div class="daily-controls">
+        <div class="daily-period-pills">${pills}</div>
+        <div class="daily-metric-toggles">${toggles}</div>
+      </div>
+      <div class="daily-chart-wrap"><canvas id="cum-canvas"></canvas></div>
+    </div>`;
+}
+
+function buildCumulativeChart() {
+  const { dates, series } = _dailyAllData;
+  const cutoff = _cumDays > 0 ? new Date(Date.now() - _cumDays * 86400000) : new Date(0);
+
+  const filtered = dates.reduce((acc, d, i) => {
+    if (d >= cutoff) {
+      acc.labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+', \''+String(d.getFullYear()).slice(2));
+      DAILY_METRIC_OPTS.forEach(m => acc.data[m.key].push(series[m.key][i]));
+    }
+    return acc;
+  }, { labels:[], data:{connections:[],messages:[],responses:[],positive:[],meetings:[]} });
+
+  // Convert to cumulative
+  const cumData = {};
+  DAILY_METRIC_OPTS.forEach(m => {
+    let sum = 0;
+    cumData[m.key] = filtered.data[m.key].map(v => { sum += v; return sum; });
+  });
+
+  const datasets = DAILY_METRIC_OPTS
+    .filter(m => _cumMetrics.includes(m.key))
+    .map(m => ({
+      label: m.label,
+      data:  cumData[m.key],
+      borderColor: m.color,
+      backgroundColor: m.color + '18',
+      borderWidth: 2,
+      pointRadius: filtered.labels.length > 60 ? 0 : 2,
+      pointHoverRadius: 4,
+      tension: 0.35,
+      fill: true,
+    }));
+
+  const ctx = document.getElementById('cum-canvas');
+  if (!ctx) return;
+  if (_cumChartInstance) _cumChartInstance.destroy();
+
+  _cumChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: filtered.labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(1,58,82,.95)',
+          titleColor: '#fff', bodyColor: 'rgba(255,255,255,.8)',
+          padding: 10, cornerRadius: 8,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(1,58,82,.04)' },
+          ticks: { font:{ size:10, family:'Montserrat' }, color:'#8899a6', maxTicksLimit: 10, maxRotation: 0 },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(1,58,82,.05)' },
+          ticks: { font:{ size:10, family:'Montserrat' }, color:'#8899a6' },
+        },
+      },
+    }
+  });
+}
+
+function setCumPeriod(days) {
+  _cumDays = days;
+  document.querySelectorAll('.cum-pill').forEach(b => {
+    const d = parseInt(b.textContent) || 0;
+    const match = (days === 7 && b.textContent==='1W') || (days === 14 && b.textContent==='2W') ||
+      (days === 21 && b.textContent==='3W') || (days === 30 && b.textContent==='1M') ||
+      (days === 60 && b.textContent==='2M') || (days === 90 && b.textContent==='3M') ||
+      (days === 365 && b.textContent==='1Y') || (days === 0 && b.textContent==='All');
+    b.classList.toggle('active', match);
+  });
+  buildCumulativeChart();
+}
+
+function toggleCumMetric(key, checked) {
+  if (checked && !_cumMetrics.includes(key)) _cumMetrics.push(key);
+  if (!checked) _cumMetrics = _cumMetrics.filter(k => k !== key);
+  buildCumulativeChart();
+}
+
+function renderDailySection(el) {
+  const pills = [
+    { label:'1W',  days:7 },
+    { label:'2W',  days:14 },
+    { label:'3W',  days:21 },
+    { label:'1M',  days:30 },
+    { label:'2M',  days:60 },
+    { label:'3M',  days:90 },
+    { label:'1Y',  days:365 },
+    { label:'All', days:0 },
+  ].map(p => `<button class="daily-pill${_dailyDays===p.days?' active':''}" onclick="setDailyPeriod(${p.days})">${p.label}</button>`).join('');
+
+  const toggles = DAILY_METRIC_OPTS.map(m =>
+    `<label class="daily-toggle">
+      <input type="checkbox" value="${m.key}" ${_dailyMetrics.includes(m.key)?'checked':''}
+        onchange="toggleDailyMetric('${m.key}',this.checked)">
+      <span style="color:${m.color}">${m.label}</span>
+    </label>`).join('');
+
+  el.innerHTML = `
+    <div class="daily-section">
+      <div class="section-hdr" style="border-bottom:1px solid var(--border)">
+        <span class="section-title">Daily Activity</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">${_dailyAllData.dates.length} days of data</span>
+      </div>
+      <div class="daily-controls">
+        <div class="daily-period-pills">${pills}</div>
+        <div class="daily-metric-toggles">${toggles}</div>
+      </div>
+      <div class="daily-chart-wrap"><canvas id="daily-canvas"></canvas></div>
+    </div>`;
+}
+
+function buildDailyChart() {
+  const { dates, series } = _dailyAllData;
+  const cutoff = _dailyDays > 0
+    ? new Date(Date.now() - _dailyDays * 86400000)
+    : new Date(0);
+
+  const filtered = dates.reduce((acc, d, i) => {
+    if (d >= cutoff) {
+      acc.labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+', \''+String(d.getFullYear()).slice(2));
+      DAILY_METRIC_OPTS.forEach(m => acc.data[m.key].push(series[m.key][i]));
+    }
+    return acc;
+  }, { labels:[], data:{connections:[],messages:[],responses:[],positive:[],meetings:[]} });
+
+  const datasets = DAILY_METRIC_OPTS
+    .filter(m => _dailyMetrics.includes(m.key))
+    .map(m => ({
+      label: m.label,
+      data:  filtered.data[m.key],
+      borderColor: m.color,
+      backgroundColor: m.color + '18',
+      borderWidth: 2,
+      pointRadius: filtered.labels.length > 60 ? 0 : 2,
+      pointHoverRadius: 4,
+      tension: 0.35,
+      fill: true,
+    }));
+
+  const ctx = document.getElementById('daily-canvas');
+  if (!ctx) return;
+  if (_chartInstance) _chartInstance.destroy();
+
+  _chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: filtered.labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(1,58,82,.95)',
+          titleColor: '#fff', bodyColor: 'rgba(255,255,255,.8)',
+          padding: 10, cornerRadius: 8,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(1,58,82,.04)' },
+          ticks: { font:{ size:10, family:'Montserrat' }, color:'#8899a6',
+            maxTicksLimit: 10, maxRotation: 0 },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(1,58,82,.05)' },
+          ticks: { font:{ size:10, family:'Montserrat' }, color:'#8899a6' },
+        },
+      },
+    }
+  });
+}
+
+function setDailyPeriod(days) {
+  _dailyDays = days;
+  document.querySelectorAll('.daily-pill').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent)===(days||0) ||
+      (b.textContent==='All' && days===0));
+  });
+  buildDailyChart();
+}
+
+function toggleDailyMetric(key, checked) {
+  if (checked) { if (!_dailyMetrics.includes(key)) _dailyMetrics.push(key); }
+  else { _dailyMetrics = _dailyMetrics.filter(k => k !== key); }
+  buildDailyChart();
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 if (!clientId) {
-  renderError('No client ID in URL. Go back to the <a href="linkedin-dashboard.html" style="color:var(--green)">dashboard</a>.');
+  renderError('No client ID in URL. Go back to the <a href="index.html" style="color:var(--green)">dashboard</a>.');
 } else {
   loadClient();
 }
