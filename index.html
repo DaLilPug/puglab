@@ -6,33 +6,41 @@
   <title>Uptown Creation — Client Dashboard</title>
   <link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/652e9dbbc7a19b06feb5076f_UN_Favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     :root {
       --navy: #013A52; --navy-dark: #012a3d; --navy-light: #edf3f6; --navy-mid: rgba(1,58,82,.06);
-      --green: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
+      --green: #1EB683; --green-500: #1EB683; --green-dark: #18a374; --green-light: #e4f7f0; --green-glow: rgba(30,182,131,.15);
       --gray-mid: #A8B4C4;
       --white: #ffffff;
-      --bg: #f0f3f5;
+      --bg: #f4f6f8;
+      --surface-1: #ffffff;
+      --surface-2: #f7f9fb;
+      --border: rgba(1,58,82,.08);
       --gray-100: #e8ecef; --gray-200: #d4dade;
       --gray-400: #8899a6; --gray-600: #4d5f6b;
       --red: #e53e3e; --red-light: #fff0f0;
-      --r: 10px; --r-lg: 16px; --r-pill: 999px;
-      --shadow-xs: 0 1px 3px rgba(1,58,82,.06), 0 1px 2px rgba(1,58,82,.04);
-      --shadow-sm: 0 2px 8px rgba(1,58,82,.08), 0 1px 3px rgba(1,58,82,.05);
-      --shadow-md: 0 8px 24px rgba(1,58,82,.10), 0 2px 8px rgba(1,58,82,.06);
-      --shadow-lg: 0 20px 60px rgba(1,58,82,.18), 0 4px 16px rgba(1,58,82,.08);
+      --r: 12px; --r-lg: 18px; --r-pill: 999px;
+      --shadow-xs: 0 1px 4px rgba(1,58,82,.05), 0 0 0 1px rgba(1,58,82,.04);
+      --shadow-sm: 0 2px 12px rgba(1,58,82,.08);
+      --shadow-md: 0 8px 32px rgba(1,58,82,.10);
+      --shadow-lg: 0 24px 64px rgba(1,58,82,.16);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', 'Montserrat', sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    h1, h2, h3, h4, h5, h6, .font-montserrat { font-family: 'Montserrat', sans-serif; line-height: 1.2; }
+    :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
     @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
     @keyframes popIn   { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
 
     /* ── HEADER ── */
-    .header { background: linear-gradient(135deg, #013A52 0%, #01526e 100%); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 66px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(255,255,255,.06), var(--shadow-md); backdrop-filter: blur(12px); }
+    .header { background: rgba(1,58,82,.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(255,255,255,.06), var(--shadow-md); }
     .header-left { display: flex; align-items: center; gap: 20px; }
     .header-logo { display: flex; align-items: center; gap: 11px; }
     .header-logo-svg { display: flex; }
@@ -46,29 +54,52 @@
     .btn-refresh { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.7); padding: 7px 16px; border-radius: var(--r-pill); cursor: pointer; font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all .2s; letter-spacing: .05em; text-transform: uppercase; backdrop-filter: blur(4px); }
     .btn-refresh:hover { background: var(--green); border-color: var(--green); color: #fff; }
     .btn-refresh:disabled { opacity: .4; cursor: not-allowed; }
-    #refresh-icon { font-size: 14px; }
+    #refresh-icon { display: inline-flex; align-items: center; }
+    #refresh-icon.spinning { animation: spin .7s linear infinite; }
+    @media (max-width: 600px) { .refresh-label { display: none; } .header-right .btn-refresh { font-size: 9px; padding: 5px 10px; gap: 4px; } }
 
     /* ── FILTER BAR ── */
-    .filter-bar { background: var(--white); border-bottom: 1px solid var(--gray-100); padding: 10px 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 66px; z-index: 90; box-shadow: var(--shadow-xs); }
+    .filter-bar { background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 64px; z-index: 90; box-shadow: var(--shadow-xs); }
     .filter-label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; margin-right: 2px; }
     .filter-select, .filter-input { height: 34px; padding: 0 14px; border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 500; color: var(--navy); background: var(--bg); outline: none; cursor: pointer; transition: border-color .15s, background .15s; }
-    .filter-select:hover, .filter-input:hover { border-color: var(--gray-200); background: #fff; }
-    .filter-select:focus, .filter-input:focus { border-color: var(--navy); background: #fff; }
+    .filter-select { appearance: none; -webkit-appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238899a6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+    .filter-select:hover, .filter-input:hover { border-color: var(--gray-200); background-color: #fff; }
+    .filter-select:focus, .filter-input:focus { border-color: var(--navy); background-color: #fff; }
     .filter-divider { width: 1px; height: 22px; background: var(--gray-100); margin: 0 4px; }
     .filter-spacer { flex: 1; }
+    .timeframe-row { display: contents; }
+    .timeframe-row { display: contents; }
+    @media (max-width: 2120px) {
+      .timeframe-row { display: flex; align-items: center; gap: 8px; flex-basis: 100%; order: 99; }
+      thead th { padding: 6px 6px; font-size: 9px; }
+      td { padding: 7px 6px; font-size: 11px; }
+    }
+    @media (max-width: 1300px) {
+      .filter-bar { gap: 6px; padding: 8px 20px; }
+      .filter-bar .btn-secondary, .filter-bar .cdd, .filter-bar .filter-input, .filter-label,
+      .timeframe-row .btn-secondary, .timeframe-row span { font-size: 10px; }
+      .filter-bar .btn-secondary, .timeframe-row .btn-secondary { height: 30px; padding: 0 10px; }
+      .filter-bar .cdd { height: 30px; padding: 0 10px 0 12px; min-width: 110px; font-size: 10px; }
+      .filter-bar .filter-input { height: 30px; padding: 0 10px 0 26px; font-size: 10px; }
+      .timeframe-row { gap: 6px; }
+    }
     .btn-primary { height: 36px; padding: 0 20px; background: linear-gradient(135deg, var(--green) 0%, #18c992 100%); color: #fff; border: none; border-radius: var(--r-pill); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all .2s; letter-spacing: .03em; box-shadow: 0 2px 10px var(--green-glow); }
     .btn-primary:hover { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%); box-shadow: 0 6px 20px var(--green-glow); transform: translateY(-1px); }
     .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 6px var(--green-glow); }
     .btn-secondary { height: 34px; padding: 0 14px; background: var(--bg); color: var(--gray-600); border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s; }
     .btn-secondary:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-light); }
     .btn-secondary.active { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: var(--shadow-xs); }
+    .view-toggle { display: inline-flex; background: var(--bg); border: 1.5px solid var(--gray-200); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+    .view-toggle-btn { height: 28px; width: 32px; padding: 0; background: transparent; border: none; border-radius: var(--r-pill); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray-400); transition: all .15s; }
+    .view-toggle-btn.active { background: var(--navy); color: #fff; box-shadow: 0 1px 4px rgba(1,58,82,.18); }
+    .view-toggle-btn:not(.active):hover { color: var(--navy); background: var(--navy-light); }
 
     /* ── MAIN ── */
     .main { padding: 24px 32px; }
 
     /* ── SUMMARY BAR ── */
     .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .summary-card { background: var(--white); border-radius: var(--r-lg); padding: 18px 20px; box-shadow: var(--shadow-xs); border: 1px solid rgba(255,255,255,.8); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; animation: fadeUp .5s ease both; }
+    .summary-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 20px 22px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; animation: fadeUp .5s ease both; }
     .summary-card:nth-child(1) { animation-delay:  0ms; }
     .summary-card:nth-child(2) { animation-delay: 50ms; }
     .summary-card:nth-child(3) { animation-delay:100ms; }
@@ -77,7 +108,7 @@
     .summary-card:nth-child(6) { animation-delay:250ms; }
     .summary-card:nth-child(7) { animation-delay:300ms; }
     .summary-card:nth-child(8) { animation-delay:350ms; }
-    .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gray-200); border-radius: 3px 0 0 3px; }
+    .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gray-200); border-radius: 4px 0 0 4px; }
     .summary-card:nth-child(1)::before { background: var(--green); }
     .summary-card:nth-child(2)::before { background: var(--navy); }
     .summary-card:nth-child(3)::before { background: #3b9fd4; }
@@ -91,22 +122,23 @@
     .summary-card:first-child::before { background: var(--green); }
     .summary-card:first-child .summary-value { color: var(--white); }
     .summary-card:first-child .summary-label { color: rgba(168,180,196,.8); }
-    .summary-value { font-size: 26px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 6px; letter-spacing: -.01em; }
-    .summary-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+    .summary-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 6px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; font-family: 'Montserrat', sans-serif; }
+    .summary-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; font-family: 'Montserrat', sans-serif; }
 
     /* ── TABLE ── */
-    .table-container { background: var(--white); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,.8); animation: fadeUp .4s ease both; animation-delay: .1s; }
+    .table-container { background: var(--surface-1); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border); animation: fadeUp .4s ease both; animation-delay: .1s; }
     .table-header-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--gray-100); }
     .table-title { font-size: 12px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .08em; }
     .table-count { font-size: 11px; color: var(--gray-400); margin-left: 8px; font-weight: 500; background: var(--bg); padding: 2px 8px; border-radius: var(--r-pill); }
     .table-scroll { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; min-width: 900px; }
-    thead th { background: var(--bg); border-bottom: 2px solid var(--gray-100); padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; cursor: pointer; user-select: none; font-family: 'Montserrat', sans-serif; transition: all .15s; }
+    thead th { background: var(--surface-2); border-bottom: 2px solid var(--border); padding: 11px 8px; text-align: left; font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; cursor: pointer; user-select: none; font-family: 'Montserrat', sans-serif; transition: all .15s; }
     thead th:hover { color: var(--navy); background: #e8ecef; }
     thead th.sorted { color: var(--green); background: var(--green-light); }
     thead th.sorted::after { content: ' ↑'; }
     thead th.sorted.desc::after { content: ' ↓'; }
-    tbody tr { border-bottom: 1px solid var(--gray-100); transition: background .15s, box-shadow .15s; animation: fadeUp .35s ease both; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s, box-shadow .15s; animation: fadeUp .35s ease both; }
+    tbody tr:nth-child(odd) { background: rgba(1,58,82,.015); }
     tbody tr:nth-child(1)  { animation-delay:  0ms; }
     tbody tr:nth-child(2)  { animation-delay: 25ms; }
     tbody tr:nth-child(3)  { animation-delay: 50ms; }
@@ -119,9 +151,14 @@
     tbody tr:nth-child(10) { animation-delay:225ms; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--navy-mid); }
-    td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
+    td { padding: 14px 8px; font-size: 13px; vertical-align: middle; }
     .td-r { text-align: right; font-variant-numeric: tabular-nums; }
     .td-name { font-weight: 700; font-size: 13px; color: var(--navy); }
+    table thead th:first-child,
+    table tbody td:first-child { position: sticky; left: 0; z-index: 2; background: var(--bg); }
+    table thead th:first-child { background: var(--surface-2); z-index: 3; }
+    tbody tr:nth-child(odd) td:first-child { background: rgba(248,250,252,1); }
+    tbody tr:hover td:first-child { background: var(--navy-mid); }
     .td-sub { font-size: 10px; color: var(--gray-400); margin-top: 3px; font-weight: 500; }
     .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
     .badge-green { background: var(--green-light); color: var(--green-dark); }
@@ -142,7 +179,7 @@
 
     /* ── CARDS ── */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
-    .client-card { background: var(--white); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-xs); border: 1px solid rgba(255,255,255,.8); transition: box-shadow .25s, transform .25s; position: relative; overflow: hidden; animation: fadeUp .4s ease both; }
+    .client-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 22px 24px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); transition: box-shadow .25s, transform .25s; position: relative; overflow: hidden; animation: fadeUp .4s ease both; }
     .client-card:nth-child(1)  { animation-delay:  0ms; }
     .client-card:nth-child(2)  { animation-delay: 40ms; }
     .client-card:nth-child(3)  { animation-delay: 80ms; }
@@ -153,8 +190,8 @@
     .client-card:nth-child(8)  { animation-delay:280ms; }
     .client-card:nth-child(9)  { animation-delay:320ms; }
     .client-card:nth-child(10) { animation-delay:360ms; }
-    .client-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green), #3bcfa0); border-radius: var(--r-lg) var(--r-lg) 0 0; }
-    .client-card:hover { box-shadow: 0 10px 30px rgba(1,58,82,.12), 0 2px 8px rgba(30,182,131,.08); transform: translateY(-3px); }
+    .client-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--green), #3bcfa0, #00b4d8); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .client-card:hover { box-shadow: var(--shadow-md), 0 2px 8px rgba(30,182,131,.08); transform: translateY(-3px); }
     .card-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; }
     .card-name { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
     .card-meta { font-size: 11px; color: var(--gray-400); font-weight: 500; line-height: 1.5; }
@@ -167,7 +204,7 @@
     /* ── MODAL ── */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(1,40,58,.55); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(6px); animation: fadeIn .2s ease both; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--white); border-radius: var(--r-lg); width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid rgba(255,255,255,.9); animation: popIn .28s cubic-bezier(.34,1.4,.64,1) both; }
+    .modal { background: var(--surface-1); border-radius: var(--r-lg); width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: popIn .28s cubic-bezier(.34,1.4,.64,1) both; }
     .modal-hdr { padding: 22px 24px 0; display: flex; align-items: center; justify-content: space-between; }
     .modal-title { font-size: 13px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .07em; }
     .modal-x { width: 30px; height: 30px; border: none; background: var(--bg); border-radius: var(--r-pill); cursor: pointer; font-size: 14px; color: var(--gray-600); display: flex; align-items: center; justify-content: center; transition: all .15s; }
@@ -216,6 +253,190 @@
     .flag-churn { background: #fde8e8; color: #c0392b; }
     .flag-top   { background: #d4f5e9; color: #0d6b47; }
     .flag-risk  { background: #fef3c7; color: #92400e; }
+
+    /* ── SYNC BANNER ── */
+    #sync-banner { display: none; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 16px; margin-bottom: 16px; align-items: center; gap: 10px; font-size: 11px; color: var(--gray-600); font-weight: 500; line-height: 1.4; }
+    #sync-banner strong { color: var(--navy); font-weight: 700; }
+    #sync-banner > span:last-child { font-size: 10px; white-space: nowrap; }
+
+    /* ── SUMMARY DELTA ── */
+    .summary-delta { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: var(--r-pill); margin-top: 5px; letter-spacing: .01em; }
+    .summary-delta.up   { background: var(--green-light); color: var(--green-dark); }
+    .summary-delta.down { background: var(--red-light);   color: var(--red); }
+
+    /* ── DESKTOP: filter-desktop-inline children flow inline ── */
+    .filter-desktop-inline { display: contents; }
+
+    /* ── MOBILE ── */
+    .mobile-filter-toggle {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 14px;
+      background: var(--bg);
+      color: var(--gray-600);
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--r-pill);
+      font-size: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s;
+      letter-spacing: .02em;
+    }
+    .mobile-filter-toggle:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-light); }
+    .mobile-filter-toggle.active { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: 0 2px 8px rgba(1,58,82,.2); }
+    .filter-badge {
+      background: var(--green);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .filter-badge.visible { display: inline-flex; }
+    .mobile-filter-toggle.active .filter-badge { background: rgba(255,255,255,.3); }
+    .filter-collapsible { display: none; overflow: hidden; }
+    .filter-collapsible.open { display: flex; flex-direction: column; gap: 8px; animation: slideDown .2s ease both; }
+    .filter-collapse-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: var(--navy-mid); border: none; border-top: 1px solid var(--border); color: var(--gray-400); font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; letter-spacing: .04em; cursor: pointer; transition: all .18s; margin-top: 4px; border-radius: 0 0 var(--r) var(--r); }
+    .filter-collapse-btn:hover { background: var(--navy-light); color: var(--navy); }
+    @keyframes slideDown { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      /* Header */
+      .header { padding: 0 16px; height: 56px; }
+      .header-pipe { display: none; }
+      .header-sub { display: none; }
+      .header-wordmark-top { font-size: 12px; }
+      .header-wordmark-bot { font-size: 6px; }
+      .header-logo-svg svg { width: 20px; height: 20px; }
+      .header-logo { gap: 7px; }
+      .header-left { gap: 12px; }
+      #last-refresh { display: none; }
+
+      /* Filter bar: single flex row, desktop filters hidden */
+      #sync-banner > span:last-child { display: none; }
+      #sync-banner { flex-wrap: wrap; font-size: 9px; padding: 7px 12px; }
+      .filter-bar { padding: 8px 16px; top: 56px; flex-wrap: wrap; gap: 6px; }
+      .filter-desktop-inline { display: none; }
+      .timeframe-row { display: none !important; }
+      .search-wrap { flex-basis: 100%; min-width: 0; }
+      .search-input { width: 100%; border-color: var(--gray-200) !important; }
+      .mobile-filter-toggle { display: flex; flex: 1; justify-content: center; order: 2; min-width: 0; padding: 0 10px; }
+      .filter-bar .view-toggle { order: 1; flex-shrink: 0; }
+      .filter-bar #btn-add-client { order: 3; flex: 1; justify-content: center; min-width: 0; padding: 0 10px; }
+      .filter-bar button[onclick="openSettings()"] { order: 4; flex-shrink: 0; padding: 0 10px !important; }
+      .filter-bar .btn-secondary,
+      .filter-bar .btn-primary,
+      .filter-bar .mobile-filter-toggle { height: 36px !important; min-height: 36px !important; line-height: 1; padding-top: 0; padding-bottom: 0; border-color: var(--gray-200) !important; }
+      .btn-view-label { display: none; }
+      .filter-collapsible { flex-basis: 100%; }
+      .filter-collapsible-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .filter-select { flex: 1; min-width: 100px; }
+      .filter-input { flex: 1; min-width: 120px; }
+      .filter-label { white-space: nowrap; }
+      .filter-divider { display: none; }
+      .filter-spacer { display: none; }
+
+      /* Main */
+      .main { padding: 14px; }
+
+      /* Summary bar */
+      .summary-bar { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+      .summary-value { font-size: 22px; }
+
+      /* Cards */
+      .cards-grid { grid-template-columns: 1fr; }
+
+      /* Forms */
+      .form-row { grid-template-columns: 1fr; }
+
+      /* Modals */
+      .modal-overlay { align-items: flex-end; }
+      .modal { border-radius: 16px 16px 0 0; width: 100% !important; max-width: 100% !important; max-height: 88vh; }
+      .detail-modal { width: 100% !important; }
+      .trend-charts { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .summary-bar { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .summary-card { padding: 14px; }
+      .summary-value { font-size: 20px; }
+      .main { padding: 10px; }
+      td { padding: 10px 12px; font-size: 12px; }
+      .client-card { padding: 14px; }
+      .metric { padding: 10px 6px; }
+      .metric-val { font-size: 15px; }
+      .metric-lbl { font-size: 8px; }
+    }
+
+    /* ── PASSWORD GATE ── */
+    #pw-gate { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(1,25,38,.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    #pw-modal { background: #fff; border-radius: 24px; width: 400px; max-width: 90vw; box-shadow: 0 40px 80px rgba(1,58,82,.28), 0 0 0 1px rgba(1,58,82,.06); overflow: hidden; animation: popIn .32s cubic-bezier(.34,1.4,.64,1) both; }
+    #pw-head { background: linear-gradient(135deg, #013A52 0%, #01526e 100%); padding: 32px 40px 28px; text-align: center; }
+    #pw-logo { height: 40px; width: auto; display: block; margin: 0 auto; }
+    #pw-body { padding: 32px 36px 36px; text-align: center; }
+    #pw-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: var(--navy); letter-spacing: -.01em; margin-bottom: 6px; }
+    #pw-sub { font-size: 13px; color: var(--gray-400); font-weight: 500; margin-bottom: 24px; line-height: 1.5; }
+    #pw-input { width: 100%; height: 48px; padding: 0 18px; border: 2px solid var(--gray-100); border-radius: var(--r); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--navy); background: var(--bg); outline: none; transition: border-color .2s, background .2s, box-shadow .2s; text-align: center; letter-spacing: .1em; margin-bottom: 8px; -webkit-appearance: none; }
+    #pw-input:focus { border-color: var(--navy); background: #fff; box-shadow: 0 0 0 3px rgba(1,58,82,.08); }
+    #pw-input.pw-err { border-color: var(--red); background: var(--red-light); }
+    #pw-input.pw-shake { animation: pwShake .4s ease; }
+    @keyframes pwShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+    #pw-error { font-size: 12px; color: var(--red); font-weight: 600; min-height: 20px; margin-bottom: 14px; }
+    #pw-submit { width: 100%; height: 48px; background: linear-gradient(135deg, var(--green) 0%, #18c992 100%); color: #fff; border: none; border-radius: var(--r); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; transition: all .2s; letter-spacing: .03em; box-shadow: 0 4px 16px var(--green-glow); }
+    #pw-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--green-glow); }
+    #pw-submit:active { transform: translateY(0); }
+
+    /* ── FLATPICKR CUSTOM THEME ── */
+    .flatpickr-calendar { background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); font-family: 'Montserrat', sans-serif; padding: 12px; width: 290px; }
+    .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after { display: none; }
+    .flatpickr-months { padding: 0 0 10px; align-items: center; }
+    .flatpickr-months .flatpickr-month { background: transparent; color: var(--navy); height: 34px; }
+    .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: var(--navy); fill: var(--navy); padding: 6px 10px; top: 12px; }
+    .flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover { color: var(--green); fill: var(--green); background: var(--green-light); border-radius: var(--r); }
+    .flatpickr-current-month { font-size: 13px; font-weight: 700; color: var(--navy); padding-top: 4px; }
+    .flatpickr-current-month .numInputWrapper { width: 52px; }
+    .flatpickr-current-month input.cur-year { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); }
+    .flatpickr-current-month .flatpickr-monthDropdown-months { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); background: transparent; border: none; }
+    .flatpickr-weekdays { background: transparent; margin-bottom: 4px; }
+    span.flatpickr-weekday { background: transparent; color: var(--gray-400); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .flatpickr-days { border: none; }
+    .dayContainer { padding: 0; }
+    .flatpickr-day { border-radius: var(--r); font-size: 12px; font-weight: 500; font-family: 'Montserrat', sans-serif; color: var(--navy); height: 36px; line-height: 36px; margin: 1px; }
+    .flatpickr-day:hover { background: var(--navy-light); border-color: transparent; }
+    .flatpickr-day.today { border-color: var(--green); color: var(--green); font-weight: 700; }
+    .flatpickr-day.today:hover { background: var(--green-light); }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 700; }
+    .flatpickr-day.inRange { background: var(--navy-light); border-color: transparent; box-shadow: -5px 0 0 var(--navy-light), 5px 0 0 var(--navy-light); }
+    .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: var(--gray-200); }
+    .flatpickr-input { cursor: pointer; }
+    .date-wrap { position: relative; display: inline-flex; align-items: center; }
+    .date-wrap .cal-icon { position: absolute; left: 11px; pointer-events: none; color: var(--gray-400); }
+    .date-wrap .filter-input { padding-left: 30px; min-width: 120px; }
+
+  /* ── CUSTOM DROPDOWN ── */
+  .cdd-wrap { position: relative; display: inline-block; }
+  .cdd { position: relative; display: inline-flex; align-items: center; height: 34px; padding: 0 12px 0 14px; gap: 7px; border: 1.5px solid var(--gray-100); border-radius: var(--r-pill); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--navy); background: var(--bg); cursor: pointer; user-select: none; transition: border-color .15s, background .15s, box-shadow .15s; white-space: nowrap; min-width: 130px; justify-content: space-between; }
+  .cdd:hover { border-color: var(--gray-200); background: #fff; }
+  .cdd.open { border-color: var(--navy); background: #fff; box-shadow: var(--shadow-sm); }
+  .cdd-arrow { flex-shrink: 0; transition: transform .18s; color: var(--gray-400); }
+  .cdd.open .cdd-arrow { transform: rotate(180deg); color: var(--navy); }
+  .cdd-panel { display: none; position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); z-index: 200; overflow-x: hidden; overflow-y: auto; max-height: 280px; animation: fadeUp .15s ease both; }
+  .cdd-search { width: 100%; padding: 8px 12px; border: none; border-bottom: 1px solid var(--border); font-size: 12px; font-family: 'Montserrat', sans-serif; color: var(--navy); outline: none; box-sizing: border-box; position: sticky; top: 0; background: #fff; z-index: 1; }
+  .cdd-search::placeholder { color: var(--gray-300); }
+  .cdd.open .cdd-panel { display: block; }
+  .cdd-opt { padding: 9px 14px; font-size: 12px; font-weight: 500; font-family: 'Montserrat', sans-serif; color: var(--navy); cursor: pointer; transition: background .12s; }
+  .cdd-opt:hover { background: var(--navy-light); }
+  .cdd-opt.active { font-weight: 700; color: var(--green); background: var(--green-light); }
   </style>
 </head>
 <body>
@@ -227,54 +448,188 @@
     </div>
     <div class="header-pipe" style="margin-left:4px"></div>
     <div class="header-sub">Client Dashboard</div>
-    <div class="header-pipe"></div>
-    <a href="strategist.html" style="font-size:11px;color:rgba(168,180,196,.8);font-weight:600;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#1EB683'" onmouseout="this.style.color='rgba(168,180,196,.8)'">Strategist View</a>
   </div>
   <div class="header-right">
     <span id="last-refresh"></span>
+    <a href="strategist.html" class="btn-refresh" style="text-decoration:none">
+      Strategist View
+    </a>
+    <button class="btn-refresh" id="btn-add-client" onclick="openModal()">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg><span class="refresh-label"> Hub Sheet</span>
+    </button>
     <button class="btn-refresh" id="refresh-btn" onclick="refreshAll()">
-      <span id="refresh-icon">↻</span> Refresh
+      <span id="refresh-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span><span class="refresh-label"> Refresh</span>
     </button>
   </div>
 </header>
 
 <div class="filter-bar">
+  <!-- Search - always visible -->
   <div class="search-wrap">
     <span class="search-icon"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></span>
     <input type="text" class="search-input" id="filter-search" placeholder="Search clients…" oninput="applyFilters()">
   </div>
-  <div class="filter-divider"></div>
-  <span class="filter-label">Filter</span>
-  <select class="filter-select" id="filter-strategist" onchange="applyFilters()">
-    <option value="">All Strategists</option>
-  </select>
-  <select class="filter-select" id="filter-cam" onchange="applyFilters()">
-    <option value="">All CAMs</option>
-  </select>
-  <select class="filter-select" id="filter-status" onchange="applyFilters()">
-    <option value="active">Active Only</option>
-    <option value="all">Active + Churned</option>
-    <option value="churned">Churned Only</option>
-  </select>
-  <div class="filter-divider"></div>
-  <span style="font-size:11px;color:var(--gray-400);font-weight:600;letter-spacing:.02em">Active from</span>
-  <input type="date" class="filter-input" id="filter-start" onchange="applyFilters()">
-  <span style="font-size:11px;color:var(--gray-400);font-weight:600">to</span>
-  <input type="date" class="filter-input" id="filter-end" onchange="applyFilters()">
-  <div class="filter-spacer"></div>
-  <span class="filter-label">Period</span>
-  <button class="btn-secondary" id="period-2w"  onclick="setPeriod('2w')">2W</button>
-  <button class="btn-secondary" id="period-1m"  onclick="setPeriod('1m')">1M</button>
-  <button class="btn-secondary" id="period-3m"  onclick="setPeriod('3m')">3M</button>
-  <button class="btn-secondary active" id="period-all" onclick="setPeriod('all')">All Time</button>
-  <div class="filter-divider"></div>
-  <button class="btn-secondary" id="btn-table" onclick="setView('table')">☰ Table</button>
-  <button class="btn-secondary" id="btn-cards" onclick="setView('cards')">⊞ Cards</button>
-  <button class="btn-primary" id="btn-add-client" onclick="openModal()">+ Add Client</button>
-  <button class="btn-secondary" onclick="openSettings()" title="Configure hub sheet" style="padding:0 12px;font-size:15px">⚙</button>
+
+  <!-- Desktop-only inline filters -->
+  <div class="filter-desktop-inline">
+    <div class="filter-divider"></div>
+    <span class="filter-label">Filter</span>
+    <select id="filter-strategist" style="display:none"></select>
+    <div class="cdd" id="cdd-strategist" onclick="toggleCdd('cdd-strategist',event)">
+      <span class="cdd-val" id="cdd-strategist-val">All Strategists</span>
+      <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      <div class="cdd-panel" id="cdd-strategist-panel" onclick="event.stopPropagation()">
+        <div class="cdd-opt active" onclick="pickCdd('strategist','','All Strategists')">All Strategists</div>
+      </div>
+    </div>
+    <select id="filter-cam" style="display:none"></select>
+    <div class="cdd" id="cdd-cam" onclick="toggleCdd('cdd-cam',event)">
+      <span class="cdd-val" id="cdd-cam-val">All CAMs</span>
+      <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      <div class="cdd-panel" id="cdd-cam-panel" onclick="event.stopPropagation()">
+        <div class="cdd-opt active" onclick="pickCdd('cam','','All CAMs')">All CAMs</div>
+      </div>
+    </div>
+    <select id="filter-company" style="display:none"></select>
+    <div class="cdd" id="cdd-company" onclick="toggleCdd('cdd-company',event)">
+      <span class="cdd-val" id="cdd-company-val">All Companies</span>
+      <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      <div class="cdd-panel" id="cdd-company-panel" onclick="event.stopPropagation()">
+        <div class="cdd-opt active" onclick="pickCdd('company','','All Companies')">All Companies</div>
+      </div>
+    </div>
+    <select id="filter-service" style="display:none"></select>
+    <div class="cdd" id="cdd-service" onclick="toggleCdd('cdd-service',event)">
+      <span class="cdd-val" id="cdd-service-val">All Services</span>
+      <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      <div class="cdd-panel" id="cdd-service-panel" style="max-height:none;overflow:visible" onclick="event.stopPropagation()">
+        <div class="cdd-opt active" onclick="pickCdd('service','','All Services')">All Services</div>
+      </div>
+    </div>
+    <select id="filter-status" style="display:none">
+      <option value="active">Active Only</option>
+      <option value="all">Active + Churned</option>
+      <option value="churned">Churned Only</option>
+    </select>
+    <div class="cdd" id="cdd-status" onclick="toggleCdd('cdd-status',event)">
+      <span class="cdd-val" id="cdd-status-val">Active Only</span>
+      <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      <div class="cdd-panel" onclick="event.stopPropagation()">
+        <div class="cdd-opt active" onclick="pickCdd('status','active','Active Only')">Active Only</div>
+        <div class="cdd-opt" onclick="pickCdd('status','all','Active + Churned')">Active + Churned</div>
+        <div class="cdd-opt" onclick="pickCdd('status','churned','Churned Only')">Churned Only</div>
+      </div>
+    </div>
+  </div>
+  <div class="timeframe-row">
+    <span style="font-size:11px;color:var(--gray-400);font-weight:600;letter-spacing:.02em">Timeframe</span>
+    <button class="btn-secondary" id="period-1w"  onclick="setPeriod('1w')">1W</button>
+    <button class="btn-secondary" id="period-2w"  onclick="setPeriod('2w')">2W</button>
+    <button class="btn-secondary" id="period-3w"  onclick="setPeriod('3w')">3W</button>
+    <button class="btn-secondary" id="period-1m"  onclick="setPeriod('1m')">1M</button>
+    <button class="btn-secondary" id="period-2m"  onclick="setPeriod('2m')">2M</button>
+    <button class="btn-secondary" id="period-3m"  onclick="setPeriod('3m')">3M</button>
+    <button class="btn-secondary active" id="period-all" onclick="setPeriod('all')">All Time</button>
+    <div class="filter-divider"></div>
+    <div class="date-wrap"><svg class="cal-icon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 7h12M5 1v3M11 1v3"/></svg><input type="text" class="filter-input flatpickr-input" id="filter-start" placeholder="From" readonly></div>
+    <span style="font-size:11px;color:var(--gray-400);font-weight:600">to</span>
+    <div class="date-wrap"><svg class="cal-icon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 7h12M5 1v3M11 1v3"/></svg><input type="text" class="filter-input flatpickr-input" id="filter-end" placeholder="To" readonly></div>
+    <button class="btn-secondary" id="clear-timeframe" onclick="clearTimeframe()" style="display:none;font-size:10px;padding:4px 10px" title="Clear custom dates">✕</button>
+  </div>
+
+  <!-- Actions - always visible -->
+  <div class="view-toggle">
+    <button class="view-toggle-btn" id="btn-table" onclick="setView('table')" title="Table view"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg></button>
+    <button class="view-toggle-btn active" id="btn-cards" onclick="setView('cards')" title="Cards view"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></button>
+  </div>
+  <button class="btn-secondary" onclick="openSettings()" title="Configure hub sheet" style="padding:0 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+
+  <!-- Mobile filter toggle - hidden on desktop -->
+  <button class="mobile-filter-toggle" id="mobile-filter-btn" onclick="toggleMobileFilters()">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="6" y1="12" x2="10" y2="12"/></svg>
+    Filters
+    <span class="filter-badge" id="filter-badge" style="display:none"></span>
+  </button>
+
+  <!-- Mobile collapsible filters - hidden on desktop -->
+  <div class="filter-collapsible" id="filter-collapsible">
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Strategist</span>
+      <div class="cdd" style="min-width:160px" id="cdd-mob-strategist" onclick="toggleCdd('cdd-mob-strategist',event)">
+        <span class="cdd-val" id="cdd-mob-strategist-val">All Strategists</span>
+        <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="cdd-panel" id="cdd-mob-strategist-panel" onclick="event.stopPropagation()">
+          <div class="cdd-opt active" onclick="pickCdd('strategist','','All Strategists')">All Strategists</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">CAM</span>
+      <div class="cdd" style="min-width:160px" id="cdd-mob-cam" onclick="toggleCdd('cdd-mob-cam',event)">
+        <span class="cdd-val" id="cdd-mob-cam-val">All CAMs</span>
+        <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="cdd-panel" id="cdd-mob-cam-panel" onclick="event.stopPropagation()">
+          <div class="cdd-opt active" onclick="pickCdd('cam','','All CAMs')">All CAMs</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Company</span>
+      <div class="cdd" style="min-width:160px" id="cdd-mob-company" onclick="toggleCdd('cdd-mob-company',event)">
+        <span class="cdd-val" id="cdd-mob-company-val">All Companies</span>
+        <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="cdd-panel" id="cdd-mob-company-panel" onclick="event.stopPropagation()">
+          <div class="cdd-opt active" onclick="pickCdd('company','','All Companies')">All Companies</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Service</span>
+      <div class="cdd" style="min-width:160px" id="cdd-mob-service" onclick="toggleCdd('cdd-mob-service',event)">
+        <span class="cdd-val" id="cdd-mob-service-val">All Services</span>
+        <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="cdd-panel" id="cdd-mob-service-panel" style="max-height:none;overflow:visible" onclick="event.stopPropagation()">
+          <div class="cdd-opt active" onclick="pickCdd('service','','All Services')">All Services</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Status</span>
+      <div class="cdd" style="min-width:160px" id="cdd-mob-status" onclick="toggleCdd('cdd-mob-status',event)">
+        <span class="cdd-val" id="cdd-mob-status-val">Active Only</span>
+        <svg class="cdd-arrow" width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+        <div class="cdd-panel" onclick="event.stopPropagation()">
+          <div class="cdd-opt active" onclick="pickCdd('status','active','Active Only')">Active Only</div>
+          <div class="cdd-opt" onclick="pickCdd('status','all','Active + Churned')">Active + Churned</div>
+          <div class="cdd-opt" onclick="pickCdd('status','churned','Churned Only')">Churned Only</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Timeframe</span>
+      <button class="btn-secondary period-btn" data-period="1w" onclick="setPeriod('1w')">1W</button>
+      <button class="btn-secondary period-btn" data-period="2w" onclick="setPeriod('2w')">2W</button>
+      <button class="btn-secondary period-btn" data-period="3w" onclick="setPeriod('3w')">3W</button>
+      <button class="btn-secondary period-btn" data-period="1m" onclick="setPeriod('1m')">1M</button>
+      <button class="btn-secondary period-btn" data-period="2m" onclick="setPeriod('2m')">2M</button>
+      <button class="btn-secondary period-btn" data-period="3m" onclick="setPeriod('3m')">3M</button>
+      <button class="btn-secondary period-btn active" data-period="all" onclick="setPeriod('all')">All Time</button>
+    </div>
+    <div class="filter-collapsible-row">
+      <span class="filter-label">Custom</span>
+      <input type="date" class="filter-input" oninput="document.getElementById('filter-start').value=this.value;applyTimeframe()">
+      <span style="font-size:11px;color:var(--gray-400);font-weight:600">to</span>
+      <input type="date" class="filter-input" oninput="document.getElementById('filter-end').value=this.value;applyTimeframe()">
+    </div>
+    <button class="filter-collapse-btn" onclick="toggleMobileFilters()" title="Hide filters">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l5-5 5 5"/></svg>
+      Hide filters
+    </button>
+  </div>
 </div>
 
 <div class="main">
+  <div id="sync-banner"></div>
   <div class="summary-bar" id="summary-bar"></div>
 
   <div class="table-container" id="table-view">
@@ -286,6 +641,9 @@
         <thead>
           <tr>
             <th onclick="sortBy('name')">Client</th>
+            <th onclick="sortBy('companyName')">Company</th>
+            <th onclick="sortBy('service')">Service</th>
+            <th onclick="sortBy('startDate')">Start Date</th>
             <th onclick="sortBy('strategist')">Strategist</th>
             <th onclick="sortBy('cam')">CAM</th>
             <th>Status</th>
@@ -415,11 +773,14 @@ let clients = JSON.parse(localStorage.getItem('li-dash-clients') || '[]');
 let cData = {};     // id -> metrics
 let cLoading = {};  // id -> bool
 let cError = {};    // id -> string
-let filters = { search: '', strategist: '', cam: '', status: 'active', startDate: '', endDate: '' };
+let filters = { search: '', strategist: '', cam: '', companyName: '', service: '', status: 'active', startDate: '', endDate: '' };
 let sortState = { key: 'name', dir: 'asc' };
 let view = 'table';
 let activePeriod = 'all';
 let refreshing = false;
+let hubSyncTime = null;
+let dailyByClient = {}; // clientName -> array of {date, connections, messages, meetings} sorted asc
+let prevSummary = JSON.parse(localStorage.getItem('li-dash-prev-summary') || 'null');
 
 function saveClients() { localStorage.setItem('li-dash-clients', JSON.stringify(clients)); }
 
@@ -431,6 +792,11 @@ function hubCsvUrl() { return `https://docs.google.com/spreadsheets/d/${hubSheet
 function isActive(c) { return !c.endDate; }
 function fmtNum(v) { return (v === undefined || v === null || isNaN(v) || v === 0) ? '<span class="muted">—</span>' : Math.round(v).toLocaleString(); }
 function fmtPct(v) { return (v === undefined || v === null || isNaN(v) || v === 0) ? '<span class="muted">—</span>' : v.toFixed(1) + '%'; }
+function fmtBench(v, target) {
+  if (v === undefined || v === null || isNaN(v) || v === 0) return '<span class="muted">—</span>';
+  const color = v >= target ? 'var(--green)' : 'var(--red)';
+  return `<span style="color:${color};font-weight:600">${v.toFixed(1)}%</span>`;
+}
 
 // ─── FETCH & PARSE ───────────────────────────────────────────────────────────
 async function fetchClient(client) {
@@ -459,7 +825,7 @@ async function fetchFromHub() {
   const rows = Papa.parse(text, { skipEmptyLines: true }).data;
   if (rows.length < 2) throw new Error('Output tab is empty — run the Apps Script first');
 
-  // Output columns: 0-5 base, 6 sheetUrl, 7-15 2W, 16-24 1M, 25-33 3M, 34-42 All, 43 updated, 44 error
+  // Output columns: 0-5 base, 6 sheetUrl, 7-10 company/service/messaging/content, 11-19 1W, 20-28 2W, 29-37 3W, 38-46 1M, 47-55 2M, 56-64 3M, 65-73 All, 74 updated, 75 error
   clients = [];
   cData = {}; cError = {};
 
@@ -470,21 +836,25 @@ async function fetchFromHub() {
     const id = 'hub_' + i;
     clients.push({
       id, name, sheetId: '',
-      sheetUrl:   r[6] || '',
+      sheetUrl:    r[6] || '',
+      companyName: r[7] || '',
+      service:     r[8] || '',
       strategist: r[1] || '', cam: r[2] || '',
       startDate: r[3] || null, endDate: r[4] || null,
     });
 
-    const errMsg = (r[44] || '').trim();
+    const errMsg = (r[75] || '').trim();
     if (errMsg) {
       cError[id] = errMsg; cData[id] = null;
     } else {
       const parsePeriod = offset => {
         const conn  = parseFloat(r[offset])   || 0;
-        const msg   = parseFloat(r[offset+1]) || 0;
-        const accR  = parseFloat(r[offset+2]) || 0;
+        const rawMsg = parseFloat(r[offset+1]) || 0;
+        // Sanity cap: messages can't exceed connections * 2 (or 500K absolute max)
+        const msg   = conn > 0 ? Math.min(rawMsg, conn * 2) : Math.min(rawMsg, 500000);
+        const accR  = Math.min(parseFloat(r[offset+2]) || 0, 100);
         const resp  = parseFloat(r[offset+3]) || 0;
-        const respR = parseFloat(r[offset+4]) || 0;
+        const respR = Math.min(parseFloat(r[offset+4]) || 0, 100);
         const pos   = parseFloat(r[offset+5]) || 0;
         const posR  = parseFloat(r[offset+6]) || 0;
         const meet  = parseFloat(r[offset+7]) || 0;
@@ -494,15 +864,67 @@ async function fetchFromHub() {
                  positiveResponseRate: posR, meetings: meet, positiveBookingRate: bookR };
       };
       const periods = {
-        '2w': parsePeriod(7), '1m': parsePeriod(16),
-        '3m': parsePeriod(25), 'all': parsePeriod(34),
+        '1w': parsePeriod(11), '2w': parsePeriod(20), '3w': parsePeriod(29),
+        '1m': parsePeriod(38), '2m': parsePeriod(47), '3m': parsePeriod(56), 'all': parsePeriod(65),
       };
       const d = periods[activePeriod] || periods['all'];
       cData[id] = { ...d, periods, monthly: { meetings: [], connections: [], responses: [] } };
       cError[id] = null;
     }
   }
+  // Capture most recent sync timestamp from r[43]
+  let maxTs = null;
+  for (let i = 1; i < rows.length; i++) {
+    const ts = (rows[i][74] || '').trim();
+    if (ts) { const d = new Date(ts); if (!isNaN(d) && (!maxTs || d > maxTs)) maxTs = d; }
+  }
+  hubSyncTime = maxTs;
+
+  // Compute all-client totals for delta tracking (before saving as prev)
+  let snapConn=0, snapMsg=0, snapMeet=0, snapPos=0;
+  Object.values(cData).forEach(d => {
+    if (!d || !d.periods) return;
+    const a = d.periods['all'] || {};
+    snapConn += a.connections || 0; snapMsg += a.messages || 0;
+    snapMeet += a.meetings || 0;    snapPos  += a.positive  || 0;
+  });
+  prevSummary = JSON.parse(localStorage.getItem('li-dash-prev-summary') || 'null');
+  localStorage.setItem('li-dash-prev-summary', JSON.stringify({ connections: snapConn, messages: snapMsg, meetings: snapMeet, positive: snapPos }));
+
   saveClients();
+}
+
+async function fetchDailyTab() {
+  if (!hubSheetId) return;
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Daily&tq=select%20*%20limit%20100000`;
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const text = await res.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = Papa.parse(text, { skipEmptyLines: true }).data;
+    if (rows.length < 2) return;
+
+    const map = {};
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      const date = r[0], client = r[1];
+      if (!date || !client) continue;
+      if (!map[client]) map[client] = [];
+      map[client].push({
+        date,
+        connections: parseFloat(r[3]) || 0,
+        messages:    parseFloat(r[4]) || 0,
+        responses:   parseFloat(r[5]) || 0,
+        positive:    parseFloat(r[6]) || 0,
+        meetings:    parseFloat(r[7]) || 0,
+      });
+    }
+    // Sort each client's data ascending by date
+    Object.keys(map).forEach(k => map[k].sort((a,b) => a.date.localeCompare(b.date)));
+    dailyByClient = map;
+    renderAll(); // re-render with sparklines
+  } catch(e) { /* silent fail */ }
 }
 
 async function refreshAll() {
@@ -510,11 +932,13 @@ async function refreshAll() {
   refreshing = true;
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
-  document.getElementById('refresh-icon').textContent = '⟳';
+  document.getElementById('refresh-icon').classList.add('spinning');
   try {
     if (hubSheetId) {
       await fetchFromHub();
+      updateSyncBanner();
       renderAll();
+      fetchDailyTab();
     } else {
       await Promise.all(clients.map(fetchClient));
     }
@@ -522,12 +946,12 @@ async function refreshAll() {
     // hub fetch failure — show in header
     document.getElementById('last-refresh').textContent = '⚠ ' + e.message;
     refreshing = false; btn.disabled = false;
-    document.getElementById('refresh-icon').textContent = '↻';
+    document.getElementById('refresh-icon').classList.remove('spinning');
     return;
   }
   refreshing = false;
   btn.disabled = false;
-  document.getElementById('refresh-icon').textContent = '↻';
+  document.getElementById('refresh-icon').classList.remove('spinning');
   document.getElementById('last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString();
 }
 
@@ -586,7 +1010,7 @@ function parseCsv(csvText) {
     const periods = {};
     Object.entries(colMap).forEach(([k,col]) => { periods[k] = buildPeriod(col); });
     const fallback = periods['all']||periods['3m']||periods['1m']||periods['2w']||{};
-    ['2w','1m','3m','all'].forEach(k => { if (!periods[k]) periods[k] = fallback; });
+    ['1w','2w','3w','1m','2m','3m','all'].forEach(k => { if (!periods[k]) periods[k] = fallback; });
 
     const d = periods[activePeriod] || periods['all'];
     return { ...d, periods, monthly: { meetings: [], connections: [], responses: [] } };
@@ -633,11 +1057,28 @@ function parseCsv(csvText) {
 
 // ─── PERIOD SELECTOR ─────────────────────────────────────────────────────────
 function setPeriod(p) {
+  // Clear custom timeframe when a preset is selected
+  _clearingTimeframe = true;
+  customTimeframe = null;
+  cDataBackup = null;
+  document.getElementById('filter-start').value = '';
+  document.getElementById('filter-end').value = '';
+  const fpStart = document.getElementById('filter-start')._flatpickr;
+  const fpEnd   = document.getElementById('filter-end')._flatpickr;
+  if (fpStart) { fpStart.clear(); fpStart.set('maxDate', 'today'); }
+  if (fpEnd)   { fpEnd.clear();   fpEnd.set('minDate', null); }
+  _clearingTimeframe = false;
+  const clearBtn = document.getElementById('clear-timeframe');
+  if (clearBtn) clearBtn.style.display = 'none';
+
   activePeriod = p;
-  ['2w','1m','3m','all'].forEach(k => {
+  ['1w','2w','3w','1m','2m','3m','all'].forEach(k => {
     const btn = document.getElementById('period-' + k);
     if (btn) btn.classList.toggle('active', k === p);
   });
+  document.querySelectorAll('.period-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.period === p)
+  );
   // Re-map cData to selected period for hub mode
   clients.forEach(c => {
     const d = cData[c.id];
@@ -658,6 +1099,96 @@ function getPeriodData(id) {
   return d;
 }
 
+// ─── CUSTOM TIMEFRAME ─────────────────────────────────────────────────────────
+let customTimeframe = null; // { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' }
+let cDataBackup = null; // snapshot before custom timeframe modifies cData
+let _clearingTimeframe = false; // guard against flatpickr onChange during clear
+
+function applyTimeframe() {
+  if (_clearingTimeframe) return;
+  const from = document.getElementById('filter-start').value;
+  const to   = document.getElementById('filter-end').value;
+  if (!from && !to) { clearTimeframe(); return; }
+  if (!from || !to) return; // Wait until both dates are selected
+  customTimeframe = { from, to };
+  // Deactivate period buttons
+  ['1w','2w','3w','1m','2m','3m','all'].forEach(k => {
+    const btn = document.getElementById('period-' + k);
+    if (btn) btn.classList.remove('active');
+  });
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('clear-timeframe').style.display = '';
+  activePeriod = 'custom';
+  // Save backup before modifying
+  if (!cDataBackup) {
+    cDataBackup = {};
+    clients.forEach(c => {
+      const d = cData[c.id];
+      if (d) cDataBackup[c.id] = { ...d };
+    });
+  }
+  recomputeFromDaily();
+  renderAll();
+}
+
+function clearTimeframe() {
+  _clearingTimeframe = true;
+  customTimeframe = null;
+  const elStart = document.getElementById('filter-start');
+  const elEnd   = document.getElementById('filter-end');
+  if (elStart._flatpickr) { elStart._flatpickr.clear(); elStart._flatpickr.set('maxDate', 'today'); }
+  if (elEnd._flatpickr)   { elEnd._flatpickr.clear();   elEnd._flatpickr.set('minDate', null); }
+  elStart.value = ''; elEnd.value = '';
+  document.getElementById('clear-timeframe').style.display = 'none';
+  cDataBackup = null;
+  _clearingTimeframe = false;
+  // Re-fetch fresh data and reset to All Time
+  activePeriod = 'all';
+  fetchFromHub().then(() => {
+    ['1w','2w','3w','1m','2m','3m','all'].forEach(k => {
+      const btn = document.getElementById('period-' + k);
+      if (btn) btn.classList.toggle('active', k === 'all');
+    });
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === 'all'));
+    updateSyncBanner();
+    renderAll();
+    fetchDailyTab();
+  });
+}
+
+function recomputeFromDaily() {
+  if (!customTimeframe) return;
+  const from = customTimeframe.from;
+  const to   = customTimeframe.to;
+  clients.forEach(c => {
+    const d = cData[c.id];
+    if (!d) return;
+    // Zero out all metrics first
+    d.connections = 0; d.messages = 0; d.meetings = 0;
+    d.acceptanceRate = 0; d.responses = 0; d.responseRate = 0;
+    d.positive = 0; d.positiveResponseRate = 0; d.positiveBookingRate = 0;
+    // Recompute from daily data if available
+    const daily = dailyByClient[c.name];
+    if (daily && daily.length > 0) {
+      const filtered = daily.filter(r => r.date >= from && r.date <= to);
+      const conn = filtered.reduce((s, r) => s + (r.connections || 0), 0);
+      const msg  = filtered.reduce((s, r) => s + (r.messages || 0), 0);
+      const resp = filtered.reduce((s, r) => s + (r.responses || 0), 0);
+      const pos  = filtered.reduce((s, r) => s + (r.positive || 0), 0);
+      const meet = filtered.reduce((s, r) => s + (r.meetings || 0), 0);
+      d.connections = conn;
+      d.messages = msg;
+      d.responses = resp;
+      d.positive = pos;
+      d.meetings = meet;
+      d.acceptanceRate = conn > 0 ? msg / conn * 100 : 0;
+      d.responseRate = msg > 0 ? resp / msg * 100 : 0;
+      d.positiveResponseRate = resp > 0 ? pos / resp * 100 : 0;
+      d.positiveBookingRate = pos > 0 ? meet / pos * 100 : 0;
+    }
+  });
+}
+
 // ─── TRENDS & INSIGHTS ────────────────────────────────────────────────────────
 function sparklineSVG(values) {
   if (!values || values.length < 2) return '<span class="muted" style="font-size:10px">—</span>';
@@ -671,6 +1202,25 @@ function sparklineSVG(values) {
     return `<rect x="${x}" y="${H - bh}" width="${bw}" height="${bh}" fill="${color}" rx="1.5"/>`;
   }).join('');
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="vertical-align:middle;display:inline-block">${bars}</svg>`;
+}
+
+function mkSparkline(data, key, color, days) {
+  if (!data || data.length === 0) return '<span style="color:var(--gray-200);font-size:10px">—</span>';
+  const cutoff = days ? new Date(Date.now() - days * 86400000).toISOString().slice(0,10) : '0';
+  const vals = data.filter(d => d.date >= cutoff).map(d => d[key] || 0);
+  if (vals.length < 2 || vals.every(v => v === 0)) return '<span style="color:var(--gray-200);font-size:10px">—</span>';
+  const max = Math.max(...vals, 1);
+  const w = 64, h = 28;
+  const pts = vals.map((v, i) => {
+    const x = (i / (vals.length - 1)) * w;
+    const y = h - (v / max) * (h - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lastVal = vals[vals.length - 1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${(vals.length-1)/(vals.length-1)*w}" cy="${h-(lastVal/max)*(h-4)-2}" r="2" fill="${color}"/>
+  </svg>`;
 }
 
 function trendArrow(values) {
@@ -687,47 +1237,100 @@ function getInsights(d) {
   if (!d) return flags;
 
   const p   = d.periods || {};
+  const cur = p[activePeriod] || p['all'] || d;
   const p2w = p['2w'] || d;
   const p1m = p['1m'] || d;
-  const p3m = p['3m'] || d;
-  const all = p['all'] || d;
 
   // Rolling window helpers
-  // prior2W = 1M - 2W → the 2 weeks before the most recent 2 weeks
   const prior2WConn = Math.max(0, (p1m.connections||0) - (p2w.connections||0));
   const prior2WMeet = Math.max(0, (p1m.meetings||0)    - (p2w.meetings||0));
 
-  // ── Top performer ─────────────────────────────────────────────────────────
+  // ── Benchmark thresholds (Uptown Benchmarking Framework) ─────────────────
+  // Evaluated against the currently selected period
+  // Volume gates scale down for shorter periods
+  const minConn = cur === p2w ? 20 : cur === p['1w'] ? 10 : 50;
+  const minMsg  = cur === p2w ? 10 : cur === p['1w'] ? 5  : 20;
+  const minResp = cur === p2w ? 5  : cur === p['1w'] ? 3  : 10;
+  const minPos  = cur === p2w ? 2  : cur === p['1w'] ? 1  : 5;
+
+  const hAcc  = cur.connections >= minConn && cur.acceptanceRate >= 30;
+  const lAcc  = cur.connections >= minConn && cur.acceptanceRate < 30;
+  const hResp = cur.messages >= minMsg     && cur.responseRate >= 20;
+  const lResp = cur.messages >= minMsg     && cur.responseRate < 20;
+  const hPos  = cur.responses >= minResp   && cur.positiveResponseRate >= 15;
+  const lPos  = cur.responses >= minResp   && cur.positiveResponseRate < 15;
+  const hMtg  = p2w.meetings >= 1;
+  const lMtg  = cur.connections >= minConn && p2w.meetings === 0;
+  const hBook = cur.positive >= minPos     && cur.positiveBookingRate >= 40;
+  const lBook = cur.positive >= minPos     && cur.positiveBookingRate < 40;
+
+  // ── Top performer ────────────────────────────────────────────────────────
   let topCount = 0;
-  if (all.acceptanceRate > 35) topCount++;
-  if (all.responseRate > 28)   topCount++;
-  if (all.meetings >= 5)       topCount++;
-  if (all.positiveBookingRate > 50) topCount++;
-  if (topCount >= 3) { flags.push({t:'good', s:'⭐ Top performer'}); }
+  if (hAcc) topCount++;
+  if (hResp) topCount++;
+  if (hPos) topCount++;
+  if (hBook) topCount++;
+  if (topCount >= 3) flags.push({t:'good', s:'Top performer', tip:'3+ core benchmarks above target (Acc ≥30%, Resp ≥20%, Pos ≥15%, Book ≥40%)'});
 
-  // ── Churn risk: use prior2W for meaningful momentum signal ───────────────
+  // ── Churn risk ───────────────────────────────────────────────────────────
   let riskCount = 0;
-  // If most recent 2W has < 40% activity vs prior 2W, outreach dropped off
   if (prior2WConn > 20 && p2w.connections < prior2WConn * 0.4) riskCount++;
-  // Had meetings in prior 2W but none in most recent 2W
   if (prior2WMeet > 0 && p2w.meetings === 0) riskCount++;
-  // 2W acceptance rate significantly below 1M (recent performance declining)
   if (p2w.connections > 15 && p2w.acceptanceRate < p1m.acceptanceRate * 0.65) riskCount++;
-  if (riskCount >= 2) { flags.push({t:'bad', s:'🚨 Churn risk'}); return flags.slice(0,2); }
+  if (riskCount >= 2) { flags.push({t:'bad', s:'Churn risk', tip:'Activity dropped significantly in last 2 weeks'}); return flags.slice(0,2); }
 
-  // ── Rate flags ────────────────────────────────────────────────────────────
-  if (all.connections > 100 && all.acceptanceRate < 18) flags.push({t:'warn', s:'Low acceptance'});
-  else if (all.acceptanceRate > 32 && topCount < 3)     flags.push({t:'good', s:'High acceptance'});
+  // ── Benchmarking Issue Tags ──────────────────────────────────────────────
+  // Most specific combinations first, then broader catch-alls.
+  // Acc rate context for tips
+  const accPct = cur.acceptanceRate ? cur.acceptanceRate.toFixed(1)+'%' : '—';
+  const respPct = cur.responseRate ? cur.responseRate.toFixed(1)+'%' : '—';
+  const posPct = cur.positiveResponseRate ? cur.positiveResponseRate.toFixed(1)+'%' : '—';
+  const bookPct = cur.positiveBookingRate ? cur.positiveBookingRate.toFixed(1)+'%' : '—';
 
-  if (all.messages > 50 && all.responseRate < 15) flags.push({t:'warn', s:'Low resp. rate'});
-  else if (all.responseRate > 28 && topCount < 3) flags.push({t:'good', s:'Strong responses'});
+  // LOW ACCEPTANCE combinations (Tags 5, 6, 7 before catch-all Tag 1)
+  if (lAcc && hResp && hPos && hMtg) {
+    // Tag 5: Selective audience but funnel converts — scale, don't fix
+    flags.push({t:'good', s:'Scale outreach', tip:`Acc. ${accPct} is below 30% but downstream metrics are strong. Profile naturally filters poor fits. Increase volume and test small profile tweaks (headline, photo) — don't overhaul targeting.`});
+  } else if (lAcc && lResp && hPos && lMtg) {
+    // Tag 6: Low volume makes positive rate unreliable
+    flags.push({t:'warn', s:'Targeting issue', tip:`Acc. ${accPct} and Resp. ${respPct} both below target — positive rate looks high but sample size is too small to trust. Solve acceptance first: review profile, try title matching, toggle "Posted on LinkedIn last 30 days". Don't change messaging yet.`});
+  } else if (lAcc && hResp && lPos && lMtg) {
+    // Tag 7: Getting through but message doesn't land
+    flags.push({t:'warn', s:'Targeting + messaging', tip:`Acc. ${accPct} below 30% and Pos. ${posPct} below 15%. The few who accept are engaging but not finding the offer compelling. Fix acceptance first (profile, seniority, active users), then rewrite problem statement to be more outcome-focused.`});
+  } else if (lAcc) {
+    // Tag 1: Low Acceptance catch-all — targeting or profile problem
+    flags.push({t:'warn', s:'Targeting / profile', tip:`Acc. ${accPct} below 30% benchmark. This is usually a targeting or profile problem. Action: review profile headline and photo, try title matching if applicable, toggle "Posted on LinkedIn last 30 days", or move up/down seniority level.`});
+  }
+  // HIGH ACC + LOW RESPONSE combinations (Tags 8, 9 before catch-all Tag 2)
+  else if (hAcc && lResp && hPos && lMtg) {
+    // Tag 8: Message not getting read — weak hook
+    flags.push({t:'warn', s:'Weak opener', tip:`Resp. ${respPct} below 20% but Pos. ${posPct} is above 15% — problem statement resonates with those who read it, but the opener isn't grabbing attention. Rewrite the opening line / pattern disrupt. Keep the core problem statement intact. A/B test new hooks.`});
+  } else if (hAcc && lResp && lPos && hMtg) {
+    // Tag 9: Statistically unlikely — check data
+    flags.push({t:'warn', s:'Check tracking', tip:`Low response (${respPct}) and low positive (${posPct}) but meetings are booking — this is statistically unlikely at volume. Audit data tracking: verify meetings are attributed to the right campaign before making strategy changes.`});
+  } else if (hAcc && lResp) {
+    // Tag 2: Right people connecting but message falls flat
+    flags.push({t:'warn', s:'Messaging issue', tip:`Resp. ${respPct} below 20% benchmark. Targeting is working (Acc. ${accPct}) but message feels too generic or irrelevant. Review 20-30 neutral/negative responses for patterns. Change the pattern disrupt, simplify jargon, or refine targeting excludes for bad-fit companies/titles.`});
+  }
+  // HIGH ACC + HIGH RESP combinations (Tags 10, 4 before catch-all Tag 3)
+  else if (hAcc && hResp && lPos && hMtg) {
+    // Tag 10: Converting despite weak positive — don't break what works
+    flags.push({t:'warn', s:'Refine messaging', tip:`Pos. ${posPct} below 15% but meetings are still booking. Don't change the conversion approach — focus only on rewriting the problem statement to increase the share of positive responses. Monitor that meetings hold steady as messaging changes.`});
+  } else if (hAcc && hResp && hPos && lMtg) {
+    // Tag 4: Full funnel healthy except conversion to meeting
+    flags.push({t:'bad', s:'Conversion issue', tip:`All rates above benchmark but no meetings in last 2W. This is a conversion problem, not targeting or messaging. Try: harder CTA ("Would it be worth a conversation?"), change channel (phone/email if blue collar), or check meeting link for issues (broken URL, limited availability, wrong person shown).`});
+  } else if (hAcc && hResp && lPos) {
+    // Tag 3: Engaging but not compelling enough
+    flags.push({t:'warn', s:'Weak offer', tip:`Pos. ${posPct} below 15% benchmark. Target is active and engaging but problem statement isn't impactful enough. Read 20-30 negative/neutral responses and tag common objections. Try softer CTA first ("Would it be alright if I shared a few ideas?") to validate the problem before pushing for meetings.`});
+  }
+  // Low booking rate — not a numbered tag but common gap
+  else if (hAcc && hPos && lBook) {
+    flags.push({t:'warn', s:'Low conversion', tip:`Booking rate ${bookPct} below 40% target. Interested leads aren't converting to meetings. Rewrite for more urgency, try harder CTA, consider changing channel (phone/email), or check if meeting link looks professional and has enough availability.`});
+  }
 
-  if (all.connections > 300 && all.meetings === 0) flags.push({t:'bad', s:'No meetings yet'});
-  else if (all.positiveBookingRate > 55 && topCount < 3) flags.push({t:'good', s:'Great booking rate'});
-
-  // ── Momentum: most recent 2W vs prior 2W ─────────────────────────────────
-  if (p2w.meetings > 0 && flags.length < 2)                      flags.push({t:'good', s:'Meetings this 2W'});
-  if (prior2WMeet > 0 && p2w.meetings === 0 && flags.length < 2) flags.push({t:'warn', s:'Meetings stalled'});
+  // ── Momentum (secondary flag) ────────────────────────────────────────────
+  if (p2w.meetings > 0 && flags.length < 2)                      flags.push({t:'good', s:'Meetings this 2W', tip:'Booked meetings in the last 2 weeks'});
+  if (prior2WMeet > 0 && p2w.meetings === 0 && flags.length < 2) flags.push({t:'warn', s:'Meetings stalled', tip:'Had meetings in prior 2W but none recently'});
 
   return flags.slice(0, 2);
 }
@@ -736,27 +1339,20 @@ function insightBadges(flags) {
   if (!flags.length) return '<span class="muted" style="font-size:10px">—</span>';
   const colors = { good: 'var(--green)', warn: '#f59e0b', bad: 'var(--red)' };
   const bgs    = { good: 'var(--green-light)', warn: '#fef3c7', bad: 'var(--red-light)' };
-  return flags.map(f => `<span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:${bgs[f.t]};color:${colors[f.t]};margin-right:3px;white-space:nowrap">${f.s}</span>`).join('');
+  return flags.map(f => `<span title="${f.tip||''}" style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:${bgs[f.t]};color:${colors[f.t]};margin-right:3px;white-space:nowrap;cursor:${f.tip?'help':'default'}">${f.s}</span>`).join('');
 }
 
 // ─── FILTERING & SORTING ─────────────────────────────────────────────────────
 function getFiltered() {
   return clients.filter(c => {
     if (filters.search && !c.name.toLowerCase().includes(filters.search)) return false;
-    if (filters.strategist && c.strategist !== filters.strategist) return false;
-    if (filters.cam && c.cam !== filters.cam) return false;
+    if (filters.strategist  && c.strategist  !== filters.strategist)  return false;
+    if (filters.cam         && c.cam         !== filters.cam)         return false;
+    if (filters.companyName && c.companyName !== filters.companyName) return false;
+    if (filters.service     && !c.service.split(',').map(s=>s.trim()).includes(filters.service)) return false;
     if (filters.status === 'active' && !isActive(c)) return false;
     if (filters.status === 'churned' && isActive(c)) return false;
-    if (filters.startDate) {
-      const fs = new Date(filters.startDate).getTime();
-      const ce = c.endDate ? new Date(c.endDate).getTime() : Infinity;
-      if (ce < fs) return false;
-    }
-    if (filters.endDate) {
-      const fe = new Date(filters.endDate).getTime();
-      const cs = c.startDate ? new Date(c.startDate).getTime() : 0;
-      if (cs > fe) return false;
-    }
+    // Date filters removed — timeframe now recomputes metrics, doesn't filter clients
     return true;
   });
 }
@@ -765,7 +1361,7 @@ function getSorted(list) {
   return [...list].sort((a, b) => {
     const k = sortState.key;
     let av, bv;
-    if (['name','strategist','cam'].includes(k)) {
+    if (['name','companyName','service','startDate','strategist','cam'].includes(k)) {
       av = (a[k] || '').toLowerCase(); bv = (b[k] || '').toLowerCase();
     } else {
       av = cData[a.id] ? (cData[a.id][k] || 0) : -1;
@@ -777,14 +1373,36 @@ function getSorted(list) {
   });
 }
 
+function toggleMobileFilters() {
+  const panel = document.getElementById('filter-collapsible');
+  const btn   = document.getElementById('mobile-filter-btn');
+  const open  = panel.classList.toggle('open');
+  btn.classList.toggle('active', open);
+}
+
 function applyFilters() {
   filters.search     = (document.getElementById('filter-search').value || '').toLowerCase().trim();
-  filters.strategist = document.getElementById('filter-strategist').value;
-  filters.cam        = document.getElementById('filter-cam').value;
-  filters.status     = document.getElementById('filter-status').value;
-  filters.startDate  = document.getElementById('filter-start').value;
-  filters.endDate    = document.getElementById('filter-end').value;
+  filters.strategist  = document.getElementById('filter-strategist').value;
+  filters.cam         = document.getElementById('filter-cam').value;
+  filters.companyName = document.getElementById('filter-company').value;
+  filters.service     = document.getElementById('filter-service').value;
+  filters.status      = document.getElementById('filter-status').value;
   renderAll();
+  updateFilterBadge();
+}
+
+function updateFilterBadge() {
+  const badge = document.getElementById('filter-badge');
+  if (!badge) return;
+  let count = 0;
+  if (document.getElementById('filter-strategist').value) count++;
+  if (document.getElementById('filter-cam').value) count++;
+  if (document.getElementById('filter-company').value) count++;
+  if (document.getElementById('filter-service').value) count++;
+  if (document.getElementById('filter-status') && document.getElementById('filter-status').value !== 'active') count++;
+  if (document.getElementById('filter-start').value || document.getElementById('filter-end').value) count++;
+  if (count > 0) { badge.textContent = count; badge.classList.add('visible'); }
+  else { badge.textContent = ''; badge.classList.remove('visible'); }
 }
 
 function sortBy(key) {
@@ -794,13 +1412,111 @@ function sortBy(key) {
 }
 
 function populateDropdowns() {
-  const strats = [...new Set(clients.map(c => c.strategist).filter(Boolean))].sort();
-  const cams   = [...new Set(clients.map(c => c.cam).filter(Boolean))].sort();
-  const ss = document.getElementById('filter-strategist');
-  const cs = document.getElementById('filter-cam');
-  const sv = ss.value, cv = cs.value;
-  ss.innerHTML = '<option value="">All Strategists</option>' + strats.map(s => `<option${s===sv?' selected':''}>${s}</option>`).join('');
-  cs.innerHTML = '<option value="">All CAMs</option>' + cams.map(s => `<option${s===cv?' selected':''}>${s}</option>`).join('');
+  const strats    = [...new Set(clients.map(c => c.strategist).filter(Boolean))].sort();
+  const cams      = [...new Set(clients.map(c => c.cam).filter(Boolean))].sort();
+  const companies = [...new Set(clients.map(c => c.companyName).filter(Boolean))].sort();
+  const services  = [...new Set(clients.flatMap(c => c.service ? c.service.split(',').map(s=>s.trim()) : []).filter(Boolean))].sort();
+
+  const curStrat   = document.getElementById('filter-strategist').value;
+  const curCam     = document.getElementById('filter-cam').value;
+  const curCompany = document.getElementById('filter-company').value;
+  const curService = document.getElementById('filter-service').value;
+
+  setCddOpts('strategist', [['', 'All Strategists'], ...strats.map(s => [s, s])],    curStrat);
+  setCddOpts('cam',        [['', 'All CAMs'],        ...cams.map(s => [s, s])],       curCam);
+  setCddOpts('company',    [['', 'All Companies'],   ...companies.map(s => [s, s])],  curCompany);
+  setCddOpts('service',    [['', 'All Services'],    ...services.map(s => [s, s])],   curService);
+}
+
+function setCddOpts(key, opts, currentVal) {
+  const panel    = document.getElementById(`cdd-${key}-panel`);
+  const mobPanel = document.getElementById(`cdd-mob-${key}-panel`);
+  const hidden   = document.getElementById(`filter-${key}`);
+  if (!panel) return;
+
+  const searchable = key === 'company';
+  const searchHtml = searchable ? `<input class="cdd-search" type="text" placeholder="Search companies…" onclick="event.stopPropagation()" oninput="filterCddOpts(this)">` : '';
+
+  const optsHtml = opts.map(([v, l]) =>
+    `<div class="cdd-opt${v === currentVal ? ' active' : ''}" data-label="${l.toLowerCase()}" onclick="pickCdd('${key}','${v.replace(/'/g,"\\'")}','${l.replace(/'/g,"\\'")}')">${l}</div>`
+  ).join('');
+
+  panel.innerHTML = searchHtml + optsHtml;
+  if (mobPanel) mobPanel.innerHTML = searchHtml + optsHtml;
+
+  // Also update hidden select options for badge counting
+  if (hidden) {
+    hidden.innerHTML = opts.map(([v, l]) => `<option value="${v}"${v === currentVal ? ' selected' : ''}>${l}</option>`).join('');
+  }
+}
+
+function filterCddOpts(input) {
+  const q = input.value.toLowerCase().trim();
+  const opts = input.parentElement.querySelectorAll('.cdd-opt');
+  opts.forEach(opt => {
+    const label = opt.getAttribute('data-label') || opt.textContent.toLowerCase();
+    opt.style.display = (!q || label.includes(q)) ? '' : 'none';
+  });
+}
+
+function pickCdd(key, value, label) {
+  // Update hidden select
+  const hidden = document.getElementById(`filter-${key}`);
+  if (hidden) hidden.value = value;
+
+  // Update desktop display
+  const valEl = document.getElementById(`cdd-${key}-val`);
+  if (valEl) valEl.textContent = label;
+
+  // Update mobile display
+  const mobValEl = document.getElementById(`cdd-mob-${key}-val`);
+  if (mobValEl) mobValEl.textContent = label;
+
+  // Update active states in all panels for this key
+  document.querySelectorAll(`#cdd-${key}-panel .cdd-opt, #cdd-mob-${key}-panel .cdd-opt`).forEach(el => {
+    el.classList.toggle('active', el.textContent === label);
+  });
+
+  closeAllCdd();
+  applyFilters();
+}
+
+function toggleCdd(id, event) {
+  if (event) event.stopPropagation();
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  closeAllCdd();
+  if (!isOpen) el.classList.add('open');
+}
+
+function closeAllCdd() {
+  document.querySelectorAll('.cdd.open').forEach(d => d.classList.remove('open'));
+}
+
+document.addEventListener('click', closeAllCdd);
+
+// ─── SYNC BANNER ─────────────────────────────────────────────────────────────
+function updateSyncBanner() {
+  const banner = document.getElementById('sync-banner');
+  if (!banner) return;
+  if (!hubSyncTime) { banner.style.display = 'none'; return; }
+
+  const now  = new Date();
+  const diff = now - hubSyncTime;
+  const mins = Math.floor(diff / 60000);
+  const hrs  = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  const age  = mins < 2 ? 'just now'
+    : mins < 60  ? `${mins}m ago`
+    : hrs  < 24  ? `${hrs}h ago`
+    : `${days}d ago`;
+
+  const fmt = hubSyncTime.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  banner.style.display = 'flex';
+  banner.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.6"><polyline points="1 4 1 10 7 10"/><polyline points="15 12 15 6 9 6"/><path d="M15 6A7 7 0 0 0 2.3 4.3M1 10a7 7 0 0 0 12.7 1.7"/></svg>
+    <span>Hub sheet last synced <strong>${fmt}</strong> <span style="color:var(--gray-400)">&nbsp;·&nbsp; ${age}</span></span>
+    <span style="margin-left:auto;opacity:.7">Numbers reflect last Apps Script run · not real-time</span>`;
 }
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
@@ -813,16 +1529,50 @@ function renderSummary() {
     const d = getPeriodData(c.id);
     if (d) { tc+=d.connections; tm+=d.messages; tr+=d.responses; tp+=d.positive; tmt+=d.meetings; dc++; }
   });
+
+  // Deltas compare all-clients all-time totals vs the snapshot from the previous fetch.
+  // Only meaningful when viewing the "all" period with no period filter active.
+  let allConn=0, allMsg=0, allMeet=0, allPos=0;
+  if (activePeriod === 'all' && prevSummary) {
+    clients.forEach(c => {
+      const d = cData[c.id];
+      if (!d || !d.periods) return;
+      const a = d.periods['all'] || {};
+      allConn += a.connections || 0; allMsg += a.messages || 0;
+      allMeet += a.meetings   || 0; allPos  += a.positive  || 0;
+    });
+  }
+
+  function delta(key, allVal) {
+    if (activePeriod !== 'all' || !prevSummary || !prevSummary[key] || prevSummary[key] === 0) return '';
+    const diff = Math.round(allVal - prevSummary[key]);
+    if (Math.abs(diff) < 1) return '';
+    const pct  = Math.round((diff / prevSummary[key]) * 100);
+    const sign = diff > 0 ? '+' : '';
+    const cls  = diff > 0 ? 'up' : 'down';
+    return `<div class="summary-delta ${cls}">${sign}${diff.toLocaleString()} (${sign}${pct}%) vs prev sync</div>`;
+  }
+
+  const shortN = v => {
+    if (!v || isNaN(v)) return '—';
+    if (v >= 1e9) return (v/1e9).toFixed(1)+'B';
+    if (v >= 1e6) return (v/1e6).toFixed(1)+'M';
+    if (v >= 1e3) return (v/1e3).toFixed(1)+'K';
+    return Math.round(v).toLocaleString();
+  };
+  const safeAcc  = (dc > 0 && tc > 0) ? Math.min(tm/tc*100, 100).toFixed(1)+'%' : '—';
+  const safeResp = (dc > 0 && tm > 0) ? Math.min(tr/tm*100, 100).toFixed(1)+'%' : '—';
+  const safeBook = (dc > 0 && tp > 0) ? Math.min(tmt/tp*100, 100).toFixed(1)+'%' : '—';
   document.getElementById('summary-bar').innerHTML = [
-    [list.length, 'Clients Shown'],
-    [tc.toLocaleString(), 'Total Connections'],
-    [tm.toLocaleString(), 'Total Messages'],
-    [dc>0 ? (tm/tc*100).toFixed(1)+'%' : '—', 'Avg Acceptance'],
-    [dc>0 ? (tr/tm*100).toFixed(1)+'%' : '—', 'Avg Response Rate'],
-    [tp.toLocaleString(), 'Total Positive'],
-    [tmt.toLocaleString(), 'Total Meetings'],
-    [dc>0 && tp>0 ? (tmt/tp*100).toFixed(1)+'%' : '—', 'Avg Booking Rate'],
-  ].map(([v,l]) => `<div class="summary-card"><div class="summary-value">${v}</div><div class="summary-label">${l}</div></div>`).join('');
+    [list.length,       'Clients Shown',     ''],
+    [shortN(tc),        'Total Connections',  delta('connections', allConn)],
+    [shortN(tm),        'Total Messages',     delta('messages', allMsg)],
+    [safeAcc,           'Avg Acceptance',    ''],
+    [safeResp,          'Avg Response Rate', ''],
+    [shortN(tp),        'Total Positive',     delta('positive', allPos)],
+    [shortN(tmt),       'Total Meetings',     delta('meetings', allMeet)],
+    [safeBook,          'Avg Booking Rate',  ''],
+  ].map(([v,l,d]) => `<div class="summary-card"><div class="summary-value">${v}</div><div class="summary-label">${l}</div>${d}</div>`).join('');
 }
 
 function renderTable() {
@@ -830,7 +1580,7 @@ function renderTable() {
   document.getElementById('table-count').textContent = `— ${list.length} client${list.length!==1?'s':''}`;
 
   if (list.length === 0) {
-    document.getElementById('table-body').innerHTML = `<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">No clients match your filters</div></div></td></tr>`;
+    document.getElementById('table-body').innerHTML = `<tr><td colspan="14"><div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.35"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="14" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg></div><div class="empty-title">No clients match your filters</div></div></td></tr>`;
     return;
   }
 
@@ -846,23 +1596,35 @@ function renderTable() {
     } else {
       const raw = cData[c.id];
       const mm = raw && raw.periods
-        ? ['2w','1m','3m','all'].map(k => (raw.periods[k] && raw.periods[k].meetings) || 0)
+        ? ['1w','2w','3w','1m','2m','3m','all'].map(k => (raw.periods[k] && raw.periods[k].meetings) || 0)
         : (d.monthly && d.monthly.meetings);
-      const trendCell = `<div style="display:flex;align-items:center;gap:5px">${sparklineSVG(mm)}${trendArrow(mm)}</div>`;
+      const trendDays = {'1w':7,'2w':14,'3w':21,'1m':30,'2m':60,'3m':90,'all':0}[activePeriod] || 0;
+      const sparkData = dailyByClient[c.name];
+      let sparkHtml = '<span style="color:var(--gray-200);font-size:10px">—</span>';
+      if (sparkData) {
+        if (customTimeframe) {
+          const filtered = sparkData.filter(r => r.date >= customTimeframe.from && r.date <= customTimeframe.to);
+          sparkHtml = filtered.length >= 2 ? mkSparkline(filtered, 'meetings', '#1EB683', null) : sparkHtml;
+        } else {
+          sparkHtml = mkSparkline(sparkData, 'meetings', '#1EB683', trendDays || null);
+        }
+      }
+      const trendCell = `<div style="display:flex;align-items:center;gap:5px">${sparkHtml}</div>`;
       const insightCell = insightBadges(getInsights(d));
-      cells = `<td class="td-r">${fmtNum(d.connections)}</td><td class="td-r">${fmtNum(d.messages)}</td><td class="td-r">${fmtPct(d.acceptanceRate)}</td><td class="td-r">${fmtNum(d.responses)}</td><td class="td-r">${fmtPct(d.responseRate)}</td><td class="td-r">${fmtNum(d.positive)}</td><td class="td-r">${fmtPct(d.positiveResponseRate)}</td><td class="td-r">${fmtNum(d.meetings)}</td><td class="td-r">${fmtPct(d.positiveBookingRate)}</td><td>${trendCell}</td><td>${insightCell}</td>`;
+      cells = `<td class="td-r">${fmtNum(d.connections)}</td><td class="td-r">${fmtNum(d.messages)}</td><td class="td-r">${fmtBench(d.acceptanceRate,30)}</td><td class="td-r">${fmtNum(d.responses)}</td><td class="td-r">${fmtBench(d.responseRate,20)}</td><td class="td-r">${fmtNum(d.positive)}</td><td class="td-r">${fmtBench(d.positiveResponseRate,15)}</td><td class="td-r">${fmtNum(d.meetings)}</td><td class="td-r">${fmtBench(d.positiveBookingRate,40)}</td><td>${trendCell}</td><td>${insightCell}</td>`;
     }
     const badge = isActive(c) ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Churned</span>';
     return `<tr class="clickable" onclick="openDetail('${c.id}')">
-      <td><div class="td-name">${c.name}</div>${c.startDate?`<div class="td-sub">Since ${c.startDate}</div>`:''}</td>
-      <td>${c.strategist||'<span class="muted">—</span>'}</td>
-      <td>${c.cam||'<span class="muted">—</span>'}</td>
+      <td><div class="td-name">${c.name}</div></td>
+      <td>${c.companyName||'<span class="muted">—</span>'}</td>
+      <td>${c.service||'<span class="muted">—</span>'}</td>
+      <td style="white-space:nowrap">${c.startDate||'<span class="muted">—</span>'}</td>
+      <td style="white-space:nowrap">${c.strategist||'<span class="muted">—</span>'}</td>
+      <td style="white-space:nowrap">${c.cam||'<span class="muted">—</span>'}</td>
       <td>${badge}</td>
       ${cells}
       <td><div class="action-btns">
-        ${c.sheetUrl ? `<a class="action-btn" href="${c.sheetUrl}" target="_blank" onclick="event.stopPropagation()" title="Open Google Sheet" style="text-decoration:none">↗</a>` : ''}
-        <button class="action-btn" onclick="event.stopPropagation();editClient('${c.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5a2.121 2.121 0 0 1 3 3L5 15H2v-3L11.5 2.5z"/></svg></button>
-        <button class="action-btn danger" onclick="event.stopPropagation();deleteClient('${c.id}')">✕</button>
+        ${c.sheetUrl ? `<a class="action-btn" href="${c.sheetUrl}" target="_blank" onclick="event.stopPropagation()" title="Open Google Sheet" style="text-decoration:none"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg></a>` : ''}
       </div></td>
     </tr>`;
   }).join('');
@@ -872,7 +1634,7 @@ function renderCards() {
   const list = getSorted(getFiltered());
   const grid = document.getElementById('cards-view');
   if (list.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📊</div><div class="empty-title">No clients match your filters</div></div>`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.35"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="14" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg></div><div class="empty-title">No clients match your filters</div></div>`;
     return;
   }
   grid.innerHTML = list.map(c => {
@@ -885,14 +1647,26 @@ function renderCards() {
       const flags = getInsights(d);
       const rawD = cData[c.id];
       const mm = rawD && rawD.periods
-        ? ['2w','1m','3m','all'].map(k => (rawD.periods[k] && rawD.periods[k].meetings) || 0)
+        ? ['1w','2w','3w','1m','2m','3m','all'].map(k => (rawD.periods[k] && rawD.periods[k].meetings) || 0)
         : (d.monthly && d.monthly.meetings);
-      const trendBar = mm && mm.length >= 2 ? `<div style="display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:9px;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.07em;font-weight:600">Mtg. Trend</span>${sparklineSVG(mm)}${trendArrow(mm)}</div>` : '';
+      const dailyData = dailyByClient[c.name];
+      const cardTrendDays = {'1w':7,'2w':14,'3w':21,'1m':30,'2m':60,'3m':90,'all':0}[activePeriod] || 0;
+      let sparkHtml2 = '<span style="color:var(--gray-200);font-size:10px">—</span>';
+      if (dailyData) {
+        if (customTimeframe) {
+          const filtered = dailyData.filter(r => r.date >= customTimeframe.from && r.date <= customTimeframe.to);
+          sparkHtml2 = filtered.length >= 2 ? mkSparkline(filtered, 'meetings', '#1EB683', null) : sparkHtml2;
+        } else {
+          sparkHtml2 = mkSparkline(dailyData, 'meetings', '#1EB683', cardTrendDays || null);
+        }
+      }
+      const sparkHtml = sparkHtml2;
+      const trendBar = `<div style="display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:9px;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.07em;font-weight:600">Mtg. Trend</span>${sparkHtml}</div>`;
       const flagBar = flags.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">${insightBadges(flags)}</div>` : '';
       body = `<div class="metrics-grid">
-        ${[['Connections',fmtNum(d.connections)],['Messages',fmtNum(d.messages)],['Acc. Rate',fmtPct(d.acceptanceRate)],
-           ['Responses',fmtNum(d.responses)],['Resp. Rate',fmtPct(d.responseRate)],['Positive',fmtNum(d.positive)],
-           ['Pos. Rate',fmtPct(d.positiveResponseRate)],['Meetings',fmtNum(d.meetings)],['Booking Rate',fmtPct(d.positiveBookingRate)]]
+        ${[['Connections',fmtNum(d.connections)],['Messages',fmtNum(d.messages)],['Acc. Rate',fmtBench(d.acceptanceRate,30)],
+           ['Responses',fmtNum(d.responses)],['Resp. Rate',fmtBench(d.responseRate,20)],['Positive',fmtNum(d.positive)],
+           ['Pos. Rate',fmtBench(d.positiveResponseRate,15)],['Meetings',fmtNum(d.meetings)],['Booking Rate',fmtBench(d.positiveBookingRate,40)]]
           .map(([l,v])=>`<div class="metric"><div class="metric-val">${v}</div><div class="metric-lbl">${l}</div></div>`).join('')}
       </div>${trendBar}${flagBar}`;
     }
@@ -905,7 +1679,7 @@ function renderCards() {
           ${meta?`<div class="card-meta">${meta}</div>`:''}
           ${c.startDate?`<div class="card-meta">Since ${c.startDate}${c.endDate?' → '+c.endDate:''}</div>`:''}
         </div>
-        <div class="card-actions">${badge}<button class="action-btn" onclick="editClient('${c.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5a2.121 2.121 0 0 1 3 3L5 15H2v-3L11.5 2.5z"/></svg></button><button class="action-btn" onclick="refreshOne('${c.id}')">↻</button><button class="action-btn danger" onclick="deleteClient('${c.id}')">✕</button></div>
+        <div class="card-actions">${badge}<button class="action-btn" onclick="event.stopPropagation();refreshOne('${c.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div>
       </div>
       ${body}
     </div>`;
@@ -1025,13 +1799,13 @@ function clearHubSheet() {
 function updateHubModeUI() {
   const addBtn = document.getElementById('btn-add-client');
   if (hubSheetId) {
-    addBtn.textContent = '↗ Open Hub Sheet';
+    addBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg><span class="refresh-label"> Hub Sheet</span>';
     addBtn.onclick = () => window.open(`https://docs.google.com/spreadsheets/d/${hubSheetId}/edit`, '_blank');
-    addBtn.className = 'btn-secondary';
+    addBtn.className = 'btn-refresh';
   } else {
-    addBtn.textContent = '+ Add Client';
+    addBtn.innerHTML = '<span class="refresh-label">+ Add Client</span>';
     addBtn.onclick = openModal;
-    addBtn.className = 'btn-primary';
+    addBtn.className = 'btn-refresh';
   }
 }
 
@@ -1043,8 +1817,8 @@ function openDetail(id) {
 }
 
 function periodBarChartSVG(periods, key, isRate) {
-  const keys   = ['2w','1m','3m','all'];
-  const labels = ['2W','1M','3M','All'];
+  const keys   = ['1w','2w','3w','1m','2m','3m','all'];
+  const labels = ['1W','2W','3W','1M','2M','3M','All'];
   const vals   = keys.map(k => (periods[k] && periods[k][key]) || 0);
   const max    = Math.max(...vals, 1);
   const bW = 36, gap = 12, H = 64, pad = 18;
@@ -1063,6 +1837,21 @@ function periodBarChartSVG(periods, key, isRate) {
   return `<svg width="${totalW}" height="${H+pad}" viewBox="0 0 ${totalW} ${H+pad}" style="overflow:visible">${bars}</svg>`;
 }
 
+function iconSvg(key) {
+  const a = 'width="14" height="14" viewBox="0 0 16 16" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  const icons = {
+    warn:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 2.5 14 13H2z"/><path d="M8 7v2.5M8 11.5v.5"/></svg>`,
+    crit:  `<svg ${a} stroke="#e53e3e" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11v.5"/></svg>`,
+    good:  `<svg ${a} stroke="#1EB683" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M5 8l2 2.5 4-4"/></svg>`,
+    star:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 2l1.6 3.3 3.6.5-2.6 2.5.6 3.6L8 10.1l-3.2 1.8.6-3.6-2.6-2.5 3.6-.5z"/></svg>`,
+    up:    `<svg ${a} stroke="#1EB683" stroke-width="1.5"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>`,
+    down:  `<svg ${a} stroke="#d97706" stroke-width="1.5"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>`,
+    pause: `<svg ${a} stroke="#d97706" stroke-width="1.5"><rect x="4" y="3.5" width="2.5" height="9" rx="1"/><rect x="9.5" y="3.5" width="2.5" height="9" rx="1"/></svg>`,
+    cal:   `<svg ${a} stroke="#1EB683" stroke-width="1.5"><rect x="2" y="4" width="12" height="10" rx="1.5"/><path d="M2 7.5h12M5.5 2v3M10.5 2v3"/></svg>`,
+  };
+  return icons[key] || icons.good;
+}
+
 function getFullInsights(d, periods) {
   const flags = [];
   if (!d) return flags;
@@ -1075,37 +1864,37 @@ function getFullInsights(d, periods) {
 
   // Acceptance rate
   if (all.connections > 100 && all.acceptanceRate < 18)
-    flags.push({t:'warn', icon:'⚠️', s:'Low acceptance rate', desc:`${all.acceptanceRate.toFixed(1)}% — target is 18%+. Consider refining connection message or target audience.`});
+    flags.push({t:'warn', icon:'warn', s:'Low acceptance rate', desc:`${all.acceptanceRate.toFixed(1)}% — target is 18%+. Consider refining connection message or target audience.`});
   else if (all.acceptanceRate > 32)
-    flags.push({t:'good', icon:'✅', s:'Strong acceptance rate', desc:`${all.acceptanceRate.toFixed(1)}% — well above the 32% benchmark.`});
+    flags.push({t:'good', icon:'good', s:'Strong acceptance rate', desc:`${all.acceptanceRate.toFixed(1)}% — well above the 32% benchmark.`});
 
   // Response rate
   if (all.messages > 50 && all.responseRate < 15)
-    flags.push({t:'warn', icon:'⚠️', s:'Low response rate', desc:`${all.responseRate.toFixed(1)}% — target is 15%+. Message copy may need work.`});
+    flags.push({t:'warn', icon:'warn', s:'Low response rate', desc:`${all.responseRate.toFixed(1)}% — target is 15%+. Message copy may need work.`});
   else if (all.responseRate > 28)
-    flags.push({t:'good', icon:'✅', s:'Strong response rate', desc:`${all.responseRate.toFixed(1)}% — top-tier engagement.`});
+    flags.push({t:'good', icon:'good', s:'Strong response rate', desc:`${all.responseRate.toFixed(1)}% — top-tier engagement.`});
 
   // Meetings
   if (all.connections > 300 && all.meetings === 0)
-    flags.push({t:'bad', icon:'🚨', s:'No meetings booked', desc:`${all.connections.toLocaleString()} connections sent with zero meetings — escalate immediately.`});
+    flags.push({t:'bad', icon:'crit', s:'No meetings booked', desc:`${all.connections.toLocaleString()} connections sent with zero meetings — escalate immediately.`});
   else if (all.positiveBookingRate > 55)
-    flags.push({t:'good', icon:'🎯', s:'Excellent booking rate', desc:`${all.positiveBookingRate.toFixed(1)}% of positives convert to meetings.`});
+    flags.push({t:'good', icon:'star', s:'Excellent booking rate', desc:`${all.positiveBookingRate.toFixed(1)}% of positives convert to meetings.`});
 
   // Positive response rate
   if (all.positiveResponseRate < 30 && all.responses > 20)
-    flags.push({t:'warn', icon:'📉', s:'Low positive rate', desc:`Only ${all.positiveResponseRate.toFixed(1)}% of responses are positive.`});
+    flags.push({t:'warn', icon:'down', s:'Low positive rate', desc:`Only ${all.positiveResponseRate.toFixed(1)}% of responses are positive.`});
 
   // Period trends — momentum
   if (p1m.meetings > 0 && p2w.meetings === 0)
-    flags.push({t:'warn', icon:'⏸️', s:'Meetings stalled recently', desc:`Had meetings last month but none in the past 2 weeks.`});
+    flags.push({t:'warn', icon:'pause', s:'Meetings stalled recently', desc:`Had meetings last month but none in the past 2 weeks.`});
   else if (p2w.meetings > 0)
-    flags.push({t:'good', icon:'📈', s:'Active meetings this period', desc:`${p2w.meetings} meeting${p2w.meetings!==1?'s':''} booked in the last 2 weeks.`});
+    flags.push({t:'good', icon:'cal', s:'Active meetings this period', desc:`${p2w.meetings} meeting${p2w.meetings!==1?'s':''} booked in the last 2 weeks.`});
 
   if (p3m.connections > 0 && p1m.connections < p3m.connections * 0.4)
-    flags.push({t:'warn', icon:'📉', s:'Outreach slowing down', desc:`1-month connections (${p1m.connections}) are well below 3-month pace.`});
+    flags.push({t:'warn', icon:'down', s:'Outreach slowing down', desc:`1-month connections (${p1m.connections}) are well below 3-month pace.`});
 
   if (p1m.acceptanceRate > 0 && p2w.acceptanceRate > p1m.acceptanceRate * 1.15)
-    flags.push({t:'good', icon:'🚀', s:'Acceptance rate improving', desc:`2W rate (${p2w.acceptanceRate.toFixed(1)}%) is up vs 1M (${p1m.acceptanceRate.toFixed(1)}%).`});
+    flags.push({t:'good', icon:'up', s:'Acceptance rate improving', desc:`2W rate (${p2w.acceptanceRate.toFixed(1)}%) is up vs 1M (${p1m.acceptanceRate.toFixed(1)}%).`});
 
   return flags;
 }
@@ -1118,9 +1907,9 @@ function renderDetail(c) {
   if (err) { body.innerHTML = `<div class="modal-err" style="display:block">⚠ ${err}</div>`; return; }
   if (!raw) { body.innerHTML = '<p class="muted" style="padding:20px 0">No data loaded for this client.</p>'; return; }
 
-  const periods = raw.periods || {'2w':raw,'1m':raw,'3m':raw,'all':raw};
-  const pKeys   = ['2w','1m','3m','all'];
-  const pLabels = {'2w':'2 Weeks','1m':'1 Month','3m':'3 Months','all':'All Time'};
+  const periods = raw.periods || {'1w':raw,'2w':raw,'3w':raw,'1m':raw,'2m':raw,'3m':raw,'all':raw};
+  const pKeys   = ['1w','2w','3w','1m','2m','3m','all'];
+  const pLabels = {'1w':'1 Week','2w':'2 Weeks','3w':'3 Weeks','1m':'1 Month','2m':'2 Months','3m':'3 Months','all':'All Time'};
 
   const metricDefs = [
     { key:'connections',          label:'Connections',      isRate:false },
@@ -1181,7 +1970,7 @@ function renderDetail(c) {
   const insightHtml = allInsights.length
     ? `<div class="insight-list">${allInsights.map(f =>
         `<div class="insight-item ${f.t}">
-          <span class="insight-icon">${f.icon}</span>
+          <span class="insight-icon">${iconSvg(f.icon)}</span>
           <div><strong>${f.s}</strong>${f.desc ? `<br><span style="font-weight:400;opacity:.85">${f.desc}</span>` : ''}</div>
         </div>`).join('')}</div>`
     : '<p class="muted" style="font-size:12px">No flags — campaign looks healthy.</p>';
@@ -1220,10 +2009,69 @@ function renderDetail(c) {
 setInterval(refreshAll, 5 * 60 * 1000);
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-setView('table');
+setView(window.innerWidth <= 768 ? 'cards' : 'table');
 updateHubModeUI();
 renderAll();
 refreshAll();
+
+// ─── FLATPICKR DATE PICKERS ───────────────────────────────────────────────────
+const fpStart = flatpickr('#filter-start', {
+  dateFormat: 'Y-m-d',
+  allowInput: false,
+  disableMobile: true,
+  maxDate: 'today',
+  onChange: (sel) => {
+    if (sel[0]) fpEnd.set('minDate', sel[0]);
+    applyTimeframe();
+  },
+});
+const fpEnd = flatpickr('#filter-end', {
+  dateFormat: 'Y-m-d',
+  allowInput: false,
+  disableMobile: true,
+  maxDate: 'today',
+  onChange: (sel) => {
+    if (sel[0]) fpStart.set('maxDate', sel[0]);
+    applyTimeframe();
+  },
+});
+
+// ─── PASSWORD GATE ────────────────────────────────────────────────────────────
+function checkPw() {
+  const val = document.getElementById('pw-input').value;
+  if (val === 'bob') {
+    localStorage.setItem('uptown-auth', 'ok');
+    const gate = document.getElementById('pw-gate');
+    gate.style.transition = 'opacity .3s';
+    gate.style.opacity = '0';
+    setTimeout(() => { gate.style.display = 'none'; }, 280);
+  } else {
+    const err = document.getElementById('pw-error');
+    err.textContent = 'Incorrect password. Please try again.';
+    const inp = document.getElementById('pw-input');
+    inp.classList.add('pw-err', 'pw-shake');
+    inp.value = '';
+    setTimeout(() => { inp.classList.remove('pw-shake', 'pw-err'); err.textContent = ''; }, 900);
+    inp.focus();
+  }
+}
 </script>
+
+<div id="pw-gate">
+  <div id="pw-modal">
+    <div id="pw-head">
+      <img id="pw-logo" src="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/64f90db4332a673644c7105b_Logo-White.png" alt="Uptown Creation">
+    </div>
+    <div id="pw-body">
+      <div id="pw-title">Welcome Back</div>
+      <div id="pw-sub">Enter your password to access the dashboard</div>
+      <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password">
+      <div id="pw-error"></div>
+      <button id="pw-submit" onclick="checkPw()">Access Dashboard</button>
+    </div>
+  </div>
+</div>
+<script>if(localStorage.getItem('uptown-auth')==='ok')document.getElementById('pw-gate').style.display='none';</script>
+
 </body>
 </html>
