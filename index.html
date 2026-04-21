@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Uptown Creation — Client Dashboard</title>
   <link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/652e9dbbc7a19b06feb5076f_UN_Favicon.png">
@@ -657,7 +658,6 @@
             <th class="td-r" onclick="sortBy('meetings')">Meetings</th>
             <th class="td-r" onclick="sortBy('positiveBookingRate')">Booking Rate</th>
             <th>Mtg. Trend</th>
-            <th>Insights</th>
             <th></th>
           </tr>
         </thead>
@@ -1580,7 +1580,7 @@ function renderTable() {
   document.getElementById('table-count').textContent = `— ${list.length} client${list.length!==1?'s':''}`;
 
   if (list.length === 0) {
-    document.getElementById('table-body').innerHTML = `<tr><td colspan="14"><div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.35"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="14" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg></div><div class="empty-title">No clients match your filters</div></div></td></tr>`;
+    document.getElementById('table-body').innerHTML = `<tr><td colspan="13"><div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.35"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="8" width="4" height="14" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg></div><div class="empty-title">No clients match your filters</div></div></td></tr>`;
     return;
   }
 
@@ -1588,11 +1588,11 @@ function renderTable() {
     const d = getPeriodData(c.id), loading = cLoading[c.id], err = cError[c.id];
     let cells;
     if (loading) {
-      cells = `<td colspan="11"><span class="spinner"></span><span class="muted" style="font-size:13px">Loading…</span></td>`;
+      cells = `<td colspan="10"><span class="spinner"></span><span class="muted" style="font-size:13px">Loading…</span></td>`;
     } else if (err) {
-      cells = `<td colspan="11"><span class="err-text">⚠ ${err} — <a href="#" onclick="fetchClient(clients.find(x=>x.id==='${c.id}'));return false" style="color:var(--green)">Retry</a></span></td>`;
+      cells = `<td colspan="10"><span class="err-text">⚠ ${err} — <a href="#" onclick="fetchClient(clients.find(x=>x.id==='${c.id}'));return false" style="color:var(--green)">Retry</a></span></td>`;
     } else if (!d) {
-      cells = `<td colspan="11"><span class="muted">No data</span></td>`;
+      cells = `<td colspan="10"><span class="muted">No data</span></td>`;
     } else {
       const raw = cData[c.id];
       const mm = raw && raw.periods
@@ -1610,8 +1610,7 @@ function renderTable() {
         }
       }
       const trendCell = `<div style="display:flex;align-items:center;gap:5px">${sparkHtml}</div>`;
-      const insightCell = insightBadges(getInsights(d));
-      cells = `<td class="td-r">${fmtNum(d.connections)}</td><td class="td-r">${fmtNum(d.messages)}</td><td class="td-r">${fmtBench(d.acceptanceRate,30)}</td><td class="td-r">${fmtNum(d.responses)}</td><td class="td-r">${fmtBench(d.responseRate,20)}</td><td class="td-r">${fmtNum(d.positive)}</td><td class="td-r">${fmtBench(d.positiveResponseRate,15)}</td><td class="td-r">${fmtNum(d.meetings)}</td><td class="td-r">${fmtBench(d.positiveBookingRate,40)}</td><td>${trendCell}</td><td>${insightCell}</td>`;
+      cells = `<td class="td-r">${fmtNum(d.connections)}</td><td class="td-r">${fmtNum(d.messages)}</td><td class="td-r">${fmtBench(d.acceptanceRate,30)}</td><td class="td-r">${fmtNum(d.responses)}</td><td class="td-r">${fmtBench(d.responseRate,20)}</td><td class="td-r">${fmtNum(d.positive)}</td><td class="td-r">${fmtBench(d.positiveResponseRate,15)}</td><td class="td-r">${fmtNum(d.meetings)}</td><td class="td-r">${fmtBench(d.positiveBookingRate,40)}</td><td>${trendCell}</td>`;
     }
     const badge = isActive(c) ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Churned</span>';
     return `<tr class="clickable" onclick="openDetail('${c.id}')">
@@ -1625,6 +1624,7 @@ function renderTable() {
       ${cells}
       <td><div class="action-btns">
         ${c.sheetUrl ? `<a class="action-btn" href="${c.sheetUrl}" target="_blank" onclick="event.stopPropagation()" title="Open Google Sheet" style="text-decoration:none"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg></a>` : ''}
+        <button class="action-btn" onclick="copyPassword('${c.id}', this)" title="Copy client password"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3.5"/><path d="M8.5 8.5L14 14"/><path d="M11 13l1.5 1.5"/></svg></button>
       </div></td>
     </tr>`;
   }).join('');
@@ -1644,7 +1644,6 @@ function renderCards() {
     else if (err) body = `<span class="err-text">⚠ ${err}</span>`;
     else if (!d) body = `<span class="muted">No data loaded</span>`;
     else {
-      const flags = getInsights(d);
       const rawD = cData[c.id];
       const mm = rawD && rawD.periods
         ? ['1w','2w','3w','1m','2m','3m','all'].map(k => (rawD.periods[k] && rawD.periods[k].meetings) || 0)
@@ -1662,13 +1661,12 @@ function renderCards() {
       }
       const sparkHtml = sparkHtml2;
       const trendBar = `<div style="display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:9px;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.07em;font-weight:600">Mtg. Trend</span>${sparkHtml}</div>`;
-      const flagBar = flags.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">${insightBadges(flags)}</div>` : '';
       body = `<div class="metrics-grid">
         ${[['Connections',fmtNum(d.connections)],['Messages',fmtNum(d.messages)],['Acc. Rate',fmtBench(d.acceptanceRate,30)],
            ['Responses',fmtNum(d.responses)],['Resp. Rate',fmtBench(d.responseRate,20)],['Positive',fmtNum(d.positive)],
            ['Pos. Rate',fmtBench(d.positiveResponseRate,15)],['Meetings',fmtNum(d.meetings)],['Booking Rate',fmtBench(d.positiveBookingRate,40)]]
           .map(([l,v])=>`<div class="metric"><div class="metric-val">${v}</div><div class="metric-lbl">${l}</div></div>`).join('')}
-      </div>${trendBar}${flagBar}`;
+      </div>${trendBar}`;
     }
     const badge = isActive(c) ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Churned</span>';
     const meta = [c.strategist?`Strategist: ${c.strategist}`:'', c.cam?`CAM: ${c.cam}`:''].filter(Boolean).join(' · ');
@@ -1810,10 +1808,33 @@ function updateHubModeUI() {
 }
 
 // ─── CLIENT DETAIL ───────────────────────────────────────────────────────────
+function clientPassword(c) {
+  return ((c.companyName || c.company || '') + (c.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function copyPassword(id, el) {
+  event.stopPropagation();
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  const pw = clientPassword(c);
+  navigator.clipboard.writeText(pw).then(() => {
+    const orig = el.innerHTML;
+    el.innerHTML = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>`;
+    el.style.color = 'var(--green)';
+    setTimeout(() => { el.innerHTML = orig; el.style.color = ''; }, 1500);
+  });
+}
+
+function toSlug(name, company) {
+  return [name, company].filter(Boolean).join(' ')
+    .toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-');
+}
+
 function openDetail(id) {
   const c = clients.find(x => x.id === id);
-  const sheet = c && c.sheetUrl ? encodeURIComponent(c.sheetUrl) : '';
-  window.location.href = `client.html?id=${encodeURIComponent(id)}&sheet=${sheet}`;
+  if (!c) return;
+  const slug = toSlug(c.name, c.companyName || c.company || '');
+  window.open(`client.html?client=${slug}`, '_blank');
 }
 
 function periodBarChartSVG(periods, key, isRate) {

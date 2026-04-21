@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Detail — Uptown Creation</title>
   <link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/652e9dbbc7a19b06feb5076f_UN_Favicon.png">
@@ -54,6 +55,7 @@
     /* META BAR */
     .meta-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
     .meta-chips-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .meta-link-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .sheet-meta-link { font-size: 12px; font-weight: 700; color: #00b4d8; text-decoration: none; border: 1px solid #00b4d8; border-radius: 6px; padding: 5px 12px; white-space: nowrap; transition: background 0.15s; }
     .sheet-meta-link:hover { background: rgba(0,180,216,0.1); }
     .meta-chip { display: flex; flex-direction: column; background: var(--surface-1); border-radius: var(--r); padding: 10px 16px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); min-width: 110px; transition: box-shadow .2s, transform .2s; animation: fadeUp .4s ease both; }
@@ -77,9 +79,9 @@
     /* PERIOD COMPARISON TABLE */
     .period-table { width: 100%; border-collapse: collapse; }
     .period-table th { background: var(--navy); color: #fff; font-size: 10px; font-weight: 700; text-align: center; padding: 10px 14px; letter-spacing: .06em; text-transform: uppercase; }
-    .period-table th:first-child { text-align: left; background: var(--bg); color: var(--gray-400); border-radius: 0; }
+    .period-table th:first-child { text-align: left; background: var(--bg); color: var(--gray-400); border-radius: 0; position: sticky; left: 0; z-index: 2; }
     .period-table td { padding: 10px 14px; font-size: 13px; text-align: center; border-bottom: 1px solid var(--gray-100); font-variant-numeric: tabular-nums; }
-    .period-table td:first-child { text-align: left; font-weight: 600; color: var(--navy); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .period-table td:first-child { text-align: left; font-weight: 600; color: var(--navy); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; position: sticky; left: 0; background: var(--surface-1); z-index: 1; }
     .period-table tr:last-child td { border-bottom: none; }
     .period-table tr { transition: background .15s; }
     .period-table tr:hover td { background: var(--navy-mid); }
@@ -136,7 +138,8 @@
       .meta-bar { flex-direction: column; align-items: stretch; gap: 10px; }
       .meta-chips-left { gap: 8px; flex-wrap: wrap; }
       .meta-chip { min-width: 90px; padding: 8px 12px; }
-      .sheet-meta-link { text-align: center; padding: 8px 16px; }
+      .meta-link-row { width: 100%; }
+      .sheet-meta-link { flex: 1; text-align: center; padding: 8px 4px; }
       .section { margin-bottom: 16px; }
       .section-hdr { padding: 12px 16px; flex-wrap: wrap; gap: 4px; }
       .section-hdr > span:last-child { display: none; }
@@ -167,7 +170,7 @@
     /* DAILY CHART */
     .daily-section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; animation: fadeUp .5s ease both; animation-delay: .1s; }
     .daily-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 22px 0; }
-    .daily-period-pills { display: flex; gap: 6px; }
+    .daily-period-pills { display: flex; gap: 6px; flex-wrap: wrap; }
     .daily-pill { background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 5px 13px; font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gray-600); cursor: pointer; transition: all .18s; letter-spacing: .04em; }
     .daily-pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
     .daily-pill:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
@@ -184,13 +187,12 @@
 
 <header class="header">
   <div class="header-left">
-    <a class="btn-back" href="index.html">←</a>
+    <img src="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/64f90db4332a673644c7105b_Logo-White.png" alt="Uptown Creation" style="height:32px;width:auto;object-fit:contain;display:block">
     <div class="header-pipe"></div>
     <span class="client-header-name" id="header-name">Loading…</span>
   </div>
   <div class="header-right">
     <span id="last-updated"></span>
-    <a id="sheet-link" href="#" target="_blank" class="btn-refresh" style="display:none;text-decoration:none"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg> <span class="btn-label-full">Open </span>Sheet</a>
     <button class="btn-refresh" onclick="loadClient()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span class="btn-label-full">Refresh</span></button>
   </div>
 </header>
@@ -208,16 +210,16 @@ const DEFAULT_HUB_ID = '1KI4t4JYPZNw5RbD2JTw7c4gdIhaV2fPZC9Y5RkGfGy4';
 const hubSheetId = localStorage.getItem('li-dash-hub-id') || DEFAULT_HUB_ID;
 
 // ── URL PARAMS ────────────────────────────────────────────────────────────────
-const urlParams  = new URLSearchParams(window.location.search);
-const clientId   = urlParams.get('id') || '';
-const sheetParam = urlParams.get('sheet') || '';
+const urlParams   = new URLSearchParams(window.location.search);
+const clientSlug  = urlParams.get('client') || '';
+const clientId    = urlParams.get('id') || '';
+const sheetParam  = urlParams.get('sheet') || '';
 
-// Show sheet link immediately if we have it
-if (sheetParam) {
-  const lnk = document.getElementById('sheet-link');
-  lnk.href = decodeURIComponent(sheetParam);
-  lnk.style.display = 'flex';
+function toSlug(name, company) {
+  return [name, company].filter(Boolean).join(' ')
+    .toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-');
 }
+
 
 // hub_5 → row index 5 in the CSV (1-based after header)
 function getRowIndex(id) {
@@ -240,11 +242,23 @@ async function loadClient() {
     const rows = Papa.parse(text, { skipEmptyLines: true }).data;
     if (rows.length < 2) throw new Error('Output tab is empty — run the Apps Script first');
 
-    const rowIndex = getRowIndex(clientId);
-    if (rowIndex < 1 || rowIndex >= rows.length) throw new Error('Client not found — try refreshing the dashboard first');
-
-    const r = rows[rowIndex];
+    let r;
+    if (clientSlug) {
+      r = rows.slice(1).find(row => toSlug((row[0]||'').trim(), (row[7]||'').trim()) === clientSlug);
+      if (!r) throw new Error('Client not found — the link may be outdated');
+    } else {
+      const rowIndex = getRowIndex(clientId);
+      if (rowIndex < 1 || rowIndex >= rows.length) throw new Error('Client not found — try refreshing the dashboard first');
+      r = rows[rowIndex];
+    }
     const client = parseRow(r);
+    if (client.password) {
+      const authKey = `client-auth-${clientSlug || clientId}`;
+      if (localStorage.getItem(authKey) !== 'ok') {
+        renderPasswordGate(client, authKey);
+        return;
+      }
+    }
     renderPage(client);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
   } catch(e) {
@@ -282,6 +296,9 @@ function parseRow(r) {
     contentUrl:   r[10]||'',
     lastUpdated:  r[74]||'',
     error:       (r[75]||'').trim(),
+    get password() {
+      return ((this.companyName || '') + (this.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+    },
     periods: {
       '1w':  parsePeriod(11), '2w':  parsePeriod(20), '3w':  parsePeriod(29),
       '1m':  parsePeriod(38), '2m':  parsePeriod(47), '3m':  parsePeriod(56),
@@ -300,16 +317,57 @@ function renderLoading() {
   document.getElementById('header-name').textContent = 'Loading…';
 }
 
+const NOT_FOUND_ERRORS = ['Client not found', 'No client ID'];
+
 function renderError(msg) {
+  const isNotFound = NOT_FOUND_ERRORS.some(e => msg.includes(e));
+  const body = isNotFound
+    ? `<div class="error-icon">🔗</div>
+       <div class="error-msg" style="font-size:15px;font-weight:700;margin-bottom:8px">This link is no longer valid</div>
+       <div style="font-size:13px;color:var(--gray-600);max-width:360px;line-height:1.6;margin:0 auto">It looks like this client page has moved or the link has expired. Please contact your account admin for an updated link.</div>`
+    : `<div class="error-icon">⚠️</div>
+       <div class="error-msg">${msg}</div>`;
+  document.getElementById('main').innerHTML = `<div class="error-state">${body}</div>`;
+  document.getElementById('header-name').textContent = isNotFound ? 'Link Expired' : 'Error';
+}
+
+// ── PASSWORD GATE ─────────────────────────────────────────────────────────────
+function renderPasswordGate(client, authKey) {
+  document.getElementById('header-name').textContent = client.name || 'Dashboard';
   document.getElementById('main').innerHTML = `
-    <div class="error-state">
-      <div class="error-icon">⚠️</div>
-      <div class="error-msg">${msg}</div>
-      <p style="margin-top:12px;font-size:12px;color:var(--gray-400)">
-        <a href="index.html" style="color:var(--green)">← Back to dashboard</a>
-      </p>
+    <div class="error-state" style="padding-top:100px">
+      <div style="background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(1,58,82,.12);padding:40px 36px;max-width:480px;margin:0 auto;text-align:center">
+        <div style="font-size:28px;margin-bottom:12px">🔒</div>
+        <div style="font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px">Password Required</div>
+        <div style="font-size:13px;color:var(--gray-600);margin-bottom:24px;line-height:1.6">This report is protected. Enter your password to continue.</div>
+        <input id="pw-input" type="password" placeholder="Enter password"
+          style="width:100%;height:42px;padding:0 16px;border:1.5px solid var(--gray-100);border-radius:8px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border-color .15s"
+          onkeydown="if(event.key==='Enter')checkClientPw('${authKey}','${client.password}')"
+          onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-100)'">
+        <div id="pw-error" style="font-size:12px;color:var(--red);min-height:16px;margin-bottom:10px"></div>
+        <button onclick="checkClientPw('${authKey}','${client.password}')"
+          style="width:100%;height:42px;background:linear-gradient(135deg,var(--green) 0%,#18c992 100%);color:#fff;border:none;border-radius:8px;font-size:13px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;letter-spacing:.04em">
+          Access Report
+        </button>
+        <div style="margin-top:20px;font-size:12px;color:var(--gray-400);line-height:1.6">Don't have your password? Email <a href="mailto:coach@uptown.com" style="color:var(--green);font-weight:600;text-decoration:none">coach@uptown.com</a></div>
+      </div>
     </div>`;
-  document.getElementById('header-name').textContent = 'Error';
+}
+
+function checkClientPw(authKey, correctPw) {
+  const input = document.getElementById('pw-input');
+  const errEl = document.getElementById('pw-error');
+  if (input.value === correctPw) {
+    localStorage.setItem(authKey, 'ok');
+    document.getElementById('main').innerHTML = `<div class="loading-state"><div class="spinner-lg"></div><div class="loading-text">Loading…</div></div>`;
+    loadClient();
+  } else {
+    errEl.textContent = 'Incorrect password. Please try again.';
+    input.value = '';
+    input.style.borderColor = 'var(--red)';
+    setTimeout(() => { input.style.borderColor = 'var(--gray-100)'; errEl.textContent = ''; }, 1400);
+    input.focus();
+  }
 }
 
 // ── RENDER: FULL PAGE ─────────────────────────────────────────────────────────
@@ -318,12 +376,6 @@ function renderPage(c) {
   document.getElementById('header-name').innerHTML = c.companyName
     ? `${c.name} <span style="font-weight:500;font-size:12px;color:rgba(255,255,255,.5);margin-left:8px">${c.companyName}</span>`
     : c.name;
-  // Show sheet link from parsed data if not already set via URL param
-  if (c.sheetUrl && !sheetParam) {
-    const lnk = document.getElementById('sheet-link');
-    lnk.href = c.sheetUrl;
-    lnk.style.display = 'flex';
-  }
 
   const isActive = !c.endDate;
   const statusBadge = isActive
@@ -334,8 +386,7 @@ function renderPage(c) {
   const metaChips = [
     ['Status', statusBadge],
     c.service    ? ['Service', c.service]        : null,
-    c.strategist ? ['Strategist', c.strategist] : null,
-    c.cam        ? ['CAM', c.cam]               : null,
+    c.cam        ? ['Account Manager', c.cam]   : null,
     c.startDate  ? ['Start Date', c.startDate]  : null,
     c.endDate    ? ['End Date', c.endDate]       : null,
   ].filter(Boolean).map(([label, val]) =>
@@ -343,23 +394,23 @@ function renderPage(c) {
   ).join('');
 
   const linkIcon = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>`;
-  const sheetBtn = c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Open Sheet</a>` : '';
-  const msgBtn   = c.messagingUrl ? `<a href="${c.messagingUrl}" target="_blank" class="sheet-meta-link">${linkIcon} See Messaging</a>` : '';
-  const contentBtn = c.contentUrl ? `<a href="${c.contentUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Review Content</a>` : '';
+  const sheetBtn = c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Sheet</a>` : '';
+  const msgBtn   = c.messagingUrl ? `<a href="${c.messagingUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Messaging</a>` : '';
+  const contentBtn = c.contentUrl ? `<a href="${c.contentUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Content</a>` : '';
   const metaLinks = [sheetBtn, msgBtn, contentBtn].filter(Boolean).join('');
 
   const html = `
-    <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${metaLinks}</div></div>
+    <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div class="meta-link-row">${metaLinks}</div></div>
     ${renderPeriodTable(c.periods)}
-    ${renderInsights(c.periods)}
     <div id="daily-chart-section"></div>
     <div id="daily-chart-below"></div>
     ${renderTrendCharts(c.periods)}`;
 
   document.getElementById('main').innerHTML = html;
 
-  // Kick off daily chart load if we have a sheet URL
-  const idM = sheetParam ? decodeURIComponent(sheetParam).match(/\/d\/([a-zA-Z0-9-_]+)/) : null;
+  // Kick off daily chart load — prefer sheetUrl from parsed client data, fall back to URL param
+  const sheetSource = c.sheetUrl || (sheetParam ? decodeURIComponent(sheetParam) : '');
+  const idM = sheetSource.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (idM) loadDailyChart(idM[1]);
   else { document.getElementById('daily-chart-section').style.display = 'none'; document.getElementById('daily-chart-below').style.display = 'none'; }
 }
@@ -981,8 +1032,8 @@ function toggleDailyMetric(key, checked) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-if (!clientId) {
-  renderError('No client ID in URL. Go back to the <a href="index.html" style="color:var(--green)">dashboard</a>.');
+if (!clientId && !clientSlug) {
+  renderError('No client ID in URL.');
 } else {
   loadClient();
 }
