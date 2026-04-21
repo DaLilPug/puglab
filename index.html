@@ -383,7 +383,7 @@
     #pw-modal { background: #fff; border-radius: 24px; width: 400px; max-width: 100%; box-shadow: 0 40px 80px rgba(1,58,82,.28), 0 0 0 1px rgba(1,58,82,.06); overflow: hidden; animation: popIn .32s cubic-bezier(.34,1.4,.64,1) both; }
     #pw-head { background: linear-gradient(135deg, #013A52 0%, #01526e 100%); padding: 24px 28px; text-align: center; }
     #pw-logo { height: 36px; width: auto; display: block; margin: 0 auto; }
-    #pw-body { padding: 24px 24px 28px; text-align: center; }
+    #pw-body { padding: 24px 24px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; }
     #pw-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: var(--navy); letter-spacing: -.01em; margin-bottom: 6px; }
     #pw-sub { font-size: 13px; color: var(--gray-400); font-weight: 500; margin-bottom: 24px; line-height: 1.5; }
     #pw-input { width: 100%; height: 48px; padding: 0 18px; border: 2px solid var(--gray-100); border-radius: var(--r); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--navy); background: var(--bg); outline: none; transition: border-color .2s, background .2s, box-shadow .2s; text-align: center; letter-spacing: .1em; margin-bottom: 8px; -webkit-appearance: none; }
@@ -2108,7 +2108,7 @@ function handleGoogleSignIn(response) {
       <img id="pw-logo" src="https://cdn.prod.website-files.com/64ecf9fb0fb216ac640ea64a/64f90db4332a673644c7105b_Logo-White.png" alt="Uptown Creation">
     </div>
     <div id="pw-body">
-      <div id="pw-title">Welcome Back</div>
+      <div id="pw-title">Welcome</div>
       <div id="pw-sub">Sign in with your Uptown email to continue</div>
       <div id="g_id_onload"
         data-client_id="21528800875-gn35fno4q1rbdtp5abos5nm6h6865onq.apps.googleusercontent.com"
