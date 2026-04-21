@@ -104,7 +104,7 @@
     .pct-flat { background: var(--gray-100); color: var(--gray-400); }
 
     /* TREND CHARTS GRID */
-    .trend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .trend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .trend-box { background: var(--bg); border-radius: var(--r); padding: 16px; border: 1px solid var(--gray-100); transition: box-shadow .2s, transform .2s; }
     .trend-box:hover { box-shadow: var(--shadow-sm); transform: translateY(-2px); background: var(--white); }
     .trend-box-label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
@@ -158,7 +158,7 @@
       .period-table { min-width: 440px; }
       .period-table th, .period-table td { padding: 8px 10px; font-size: 11px; }
       .pct-change { padding: 1px 4px; font-size: 9px; margin-left: 3px; }
-      .trend-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .trend-grid { grid-template-columns: 1fr 1fr; gap: 10px; } /* mobile: 2 col */
       .trend-box { padding: 12px; }
       .trend-box-main { font-size: 20px; }
       .trend-box svg { width: 100% !important; height: auto; display: block; overflow: visible; }
@@ -172,7 +172,7 @@
       .meta-chip { min-width: unset; }
       .section-hdr { padding: 10px 12px; }
       .section-body { padding: 10px 12px; }
-      .trend-grid { grid-template-columns: 1fr 1fr; }
+      .trend-grid { grid-template-columns: 1fr 1fr; } /* mobile 480: 2 col */
       .trend-box-main { font-size: 16px; }
       .trend-box-sub { font-size: 10px; }
       .insight-icon { font-size: 15px; }
@@ -648,14 +648,10 @@ function barChartSVG(periods, key, isRate) {
 }
 
 const TREND_METRICS = [
-  { key:'connections',          label:'Connections Sent',   isRate:false },
-  { key:'messages',             label:'Messages Sent',      isRate:false },
   { key:'acceptanceRate',       label:'Acceptance Rate',    isRate:true  },
-  { key:'responses',            label:'Responses',          isRate:false },
   { key:'responseRate',         label:'Response Rate',      isRate:true  },
-  { key:'meetings',             label:'Meetings Booked',    isRate:false },
   { key:'positiveResponseRate', label:'Pos. Response Rate', isRate:true  },
-  { key:'positiveBookingRate',  label:'Booking Rate',       isRate:true  },
+  { key:'positiveBookingRate',  label:'Pos. Booking Rate',  isRate:true  },
 ];
 
 function renderTrendCharts(periods) {
