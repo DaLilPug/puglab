@@ -799,8 +799,8 @@ function saveClients() { localStorage.setItem('li-dash-clients', JSON.stringify(
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function extractId(url) { const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/); return m ? m[1] : null; }
-function csvUrl(sheetId) { return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Data%20Tracking`; }
-function hubCsvUrl() { return `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Output&tq=select%20*%20limit%2010000`; }
+function csvUrl(sheetId) { return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Data%20Tracking&cb=${Date.now()}`; }
+function hubCsvUrl() { return `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Output&tq=select%20*%20limit%2010000&cb=${Date.now()}`; }
 function isActive(c) { return !c.endDate; }
 function fmtNum(v) { return (v === undefined || v === null || isNaN(v) || v === 0) ? '<span class="muted">—</span>' : Math.round(v).toLocaleString(); }
 function fmtPct(v) { return (v === undefined || v === null || isNaN(v) || v === 0) ? '<span class="muted">—</span>' : v.toFixed(1) + '%'; }
@@ -909,7 +909,7 @@ async function fetchFromHub() {
 async function fetchDailyTab() {
   if (!hubSheetId) return;
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Daily&tq=select%20*%20limit%20100000`;
+    const url = `https://docs.google.com/spreadsheets/d/${hubSheetId}/gviz/tq?tqx=out:csv&sheet=Daily&tq=select%20*%20limit%20100000&cb=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) return;
     const text = await res.text();
