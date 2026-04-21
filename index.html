@@ -1624,6 +1624,7 @@ function renderTable() {
       ${cells}
       <td><div class="action-btns">
         ${c.sheetUrl ? `<a class="action-btn" href="${c.sheetUrl}" target="_blank" onclick="event.stopPropagation()" title="Open Google Sheet" style="text-decoration:none"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg></a>` : ''}
+        <button class="action-btn" onclick="event.stopPropagation();copyClientUrl('${c.id}',this)" title="Copy client link"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1"/></svg></button>
         <button class="action-btn" onclick="copyPassword('${c.id}', this)" title="Copy client password"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3.5"/><path d="M8.5 8.5L14 14"/><path d="M11 13l1.5 1.5"/></svg></button>
       </div></td>
     </tr>`;
@@ -1817,6 +1818,18 @@ function fmtDate(d) {
 
 function clientPassword(c) {
   return ((c.companyName || c.company || '') + fmtDate(c.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function copyClientUrl(id, el) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  const url = `https://app.uptown.com/${toSlug(c.name, c.companyName||c.company||'')}`;
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = el.innerHTML;
+    el.innerHTML = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>`;
+    el.style.color = 'var(--green)';
+    setTimeout(() => { el.innerHTML = orig; el.style.color = ''; }, 1500);
+  });
 }
 
 function copyPassword(id, el) {
