@@ -108,23 +108,27 @@
     /* ── SUMMARY BAR ── */
     .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .summary-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 20px 22px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; animation: fadeUp .5s ease both; }
-    .summary-card:nth-child(1) { animation-delay:  0ms; }
-    .summary-card:nth-child(2) { animation-delay: 50ms; }
-    .summary-card:nth-child(3) { animation-delay:100ms; }
-    .summary-card:nth-child(4) { animation-delay:150ms; }
-    .summary-card:nth-child(5) { animation-delay:200ms; }
-    .summary-card:nth-child(6) { animation-delay:250ms; }
-    .summary-card:nth-child(7) { animation-delay:300ms; }
-    .summary-card:nth-child(8) { animation-delay:350ms; }
+    .summary-card:nth-child(1)  { animation-delay:  0ms; }
+    .summary-card:nth-child(2)  { animation-delay: 40ms; }
+    .summary-card:nth-child(3)  { animation-delay: 80ms; }
+    .summary-card:nth-child(4)  { animation-delay:120ms; }
+    .summary-card:nth-child(5)  { animation-delay:160ms; }
+    .summary-card:nth-child(6)  { animation-delay:200ms; }
+    .summary-card:nth-child(7)  { animation-delay:240ms; }
+    .summary-card:nth-child(8)  { animation-delay:280ms; }
+    .summary-card:nth-child(9)  { animation-delay:320ms; }
+    .summary-card:nth-child(10) { animation-delay:360ms; }
     .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gray-200); border-radius: 4px 0 0 4px; }
-    .summary-card:nth-child(1)::before { background: var(--green); }
-    .summary-card:nth-child(2)::before { background: var(--navy); }
-    .summary-card:nth-child(3)::before { background: #3b9fd4; }
-    .summary-card:nth-child(4)::before { background: var(--green); }
-    .summary-card:nth-child(5)::before { background: #f59e0b; }
-    .summary-card:nth-child(6)::before { background: var(--navy); }
-    .summary-card:nth-child(7)::before { background: var(--green); }
-    .summary-card:nth-child(8)::before { background: #f59e0b; }
+    .summary-card:nth-child(1)::before  { background: var(--green); }
+    .summary-card:nth-child(2)::before  { background: var(--navy); }
+    .summary-card:nth-child(3)::before  { background: #3b9fd4; }
+    .summary-card:nth-child(4)::before  { background: var(--green); }
+    .summary-card:nth-child(5)::before  { background: #3b9fd4; }
+    .summary-card:nth-child(6)::before  { background: #f59e0b; }
+    .summary-card:nth-child(7)::before  { background: var(--green); }
+    .summary-card:nth-child(8)::before  { background: var(--navy); }
+    .summary-card:nth-child(9)::before  { background: var(--navy); }
+    .summary-card:nth-child(10)::before { background: #f59e0b; }
     .summary-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .summary-card:first-child { background: linear-gradient(135deg, var(--navy) 0%, #01526e 100%); border-color: transparent; }
     .summary-card:first-child::before { background: var(--green); }
@@ -1568,18 +1572,21 @@ function renderSummary() {
     if (v >= 1e3) return (v/1e3).toFixed(1)+'K';
     return Math.round(v).toLocaleString();
   };
-  const safeAcc  = (dc > 0 && tc > 0) ? Math.min(tm/tc*100, 100).toFixed(1)+'%' : '—';
-  const safeResp = (dc > 0 && tm > 0) ? Math.min(tr/tm*100, 100).toFixed(1)+'%' : '—';
-  const safeBook = (dc > 0 && tp > 0) ? Math.min(tmt/tp*100, 100).toFixed(1)+'%' : '—';
+  const safeAcc     = (dc > 0 && tc > 0) ? Math.min(tm/tc*100, 100).toFixed(1)+'%' : '—';
+  const safeResp    = (dc > 0 && tm > 0) ? Math.min(tr/tm*100, 100).toFixed(1)+'%' : '—';
+  const safePosResp = (dc > 0 && tr > 0) ? Math.min(tp/tr*100, 100).toFixed(1)+'%' : '—';
+  const safeBook    = (dc > 0 && tp > 0) ? Math.min(tmt/tp*100, 100).toFixed(1)+'%' : '—';
   document.getElementById('summary-bar').innerHTML = [
-    [list.length,       'Clients Shown',     ''],
-    [shortN(tc),        'Total Connections',  delta('connections', allConn)],
-    [shortN(tm),        'Total Messages',     delta('messages', allMsg)],
-    [safeAcc,           'Avg Acceptance',    ''],
-    [safeResp,          'Avg Response Rate', ''],
-    [shortN(tp),        'Total Positive',     delta('positive', allPos)],
-    [shortN(tmt),       'Total Meetings',     delta('meetings', allMeet)],
-    [safeBook,          'Avg Booking Rate',  ''],
+    [list.length,       'Clients Shown',      ''],
+    [shortN(tc),        'Connection Requests', delta('connections', allConn)],
+    [shortN(tm),        'Messages Sent',       delta('messages', allMsg)],
+    [safeAcc,           'Acceptance Rate',     ''],
+    [shortN(tr),        'Responses',           ''],
+    [safeResp,          'Response Rate',       ''],
+    [shortN(tp),        'Positives',           delta('positive', allPos)],
+    [safePosResp,       'Pos. Response Rate',  ''],
+    [shortN(tmt),       'Meetings Booked',     delta('meetings', allMeet)],
+    [safeBook,          'Pos. Booking Rate',   ''],
   ].map(([v,l,d]) => `<div class="summary-card"><div class="summary-value">${v}</div><div class="summary-label">${l}</div>${d}</div>`).join('');
 }
 

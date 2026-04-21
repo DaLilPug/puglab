@@ -200,10 +200,12 @@
     .summary-card:nth-child(1)::before { background: #3b9fd4; }
     .summary-card:nth-child(2)::before { background: var(--navy); }
     .summary-card:nth-child(3)::before { background: var(--green); }
-    .summary-card:nth-child(4)::before { background: #f59e0b; }
-    .summary-card:nth-child(5)::before { background: var(--green); }
-    .summary-card:nth-child(6)::before { background: var(--navy); }
-    .summary-card:nth-child(7)::before { background: #f59e0b; }
+    .summary-card:nth-child(4)::before { background: #3b9fd4; }
+    .summary-card:nth-child(5)::before { background: #f59e0b; }
+    .summary-card:nth-child(6)::before { background: var(--green); }
+    .summary-card:nth-child(7)::before { background: var(--navy); }
+    .summary-card:nth-child(8)::before { background: var(--navy); }
+    .summary-card:nth-child(9)::before { background: #f59e0b; }
     .summary-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .summary-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 6px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; font-family: 'Montserrat', sans-serif; }
     .summary-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; font-family: 'Montserrat', sans-serif; }
@@ -417,13 +419,15 @@ function checkClientPw(authKey, correctPw) {
 let _summaryPeriods = null;
 
 const SUMMARY_STATS = [
-  { key: 'connections',         label: 'Total Connections',  isRate: false, color: '#3b9fd4' },
-  { key: 'messages',            label: 'Total Messages',     isRate: false, color: '#013A52' },
-  { key: 'acceptanceRate',      label: 'Avg Acceptance',     isRate: true,  color: '#1EB683' },
-  { key: 'responseRate',        label: 'Avg Response Rate',  isRate: true,  color: '#d97706' },
-  { key: 'positive',            label: 'Total Positive',     isRate: false, color: '#1EB683' },
-  { key: 'meetings',            label: 'Total Meetings',     isRate: false, color: '#013A52' },
-  { key: 'positiveBookingRate', label: 'Avg Booking Rate',   isRate: true,  color: '#d97706' },
+  { key: 'connections',          label: 'Connection Requests', isRate: false },
+  { key: 'messages',             label: 'Messages Sent',       isRate: false },
+  { key: 'acceptanceRate',       label: 'Acceptance Rate',     isRate: true  },
+  { key: 'responses',            label: 'Responses',           isRate: false },
+  { key: 'responseRate',         label: 'Response Rate',       isRate: true  },
+  { key: 'positive',             label: 'Positives',           isRate: false },
+  { key: 'positiveResponseRate', label: 'Pos. Response Rate',  isRate: true  },
+  { key: 'meetings',             label: 'Meetings Booked',     isRate: false },
+  { key: 'positiveBookingRate',  label: 'Pos. Booking Rate',   isRate: true  },
 ];
 
 function fmtStat(v, isRate) {
