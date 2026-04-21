@@ -178,6 +178,33 @@
       .insight-icon { font-size: 15px; }
       .insight-title { font-size: 11px; }
     }
+    /* SUMMARY STATS BAR — matches dashboard style */
+    .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+    .summary-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 20px 22px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; }
+    .summary-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+    .summary-card:nth-child(1)::before { background: #3b9fd4; }
+    .summary-card:nth-child(2)::before { background: var(--navy); }
+    .summary-card:nth-child(3)::before { background: var(--green); }
+    .summary-card:nth-child(4)::before { background: #f59e0b; }
+    .summary-card:nth-child(5)::before { background: var(--green); }
+    .summary-card:nth-child(6)::before { background: var(--navy); }
+    .summary-card:nth-child(7)::before { background: #f59e0b; }
+    .summary-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .summary-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 6px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; font-family: 'Montserrat', sans-serif; }
+    .summary-label { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+    .summary-period-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+    .summary-pill { background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 4px 11px; font-size: 10px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gray-600); cursor: pointer; transition: all .15s; letter-spacing: .04em; }
+    .summary-pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .summary-pill:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    @media (max-width: 768px) {
+      .summary-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .summary-card { padding: 14px 16px; }
+      .summary-value { font-size: 22px; }
+    }
+    @media (max-width: 480px) {
+      .summary-value { font-size: 20px; }
+    }
+
     /* DAILY CHART */
     .daily-section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; animation: fadeUp .5s ease both; animation-delay: .1s; }
     .daily-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 22px 0; }
@@ -393,6 +420,60 @@ function checkClientPw(authKey, correctPw) {
   }
 }
 
+// ── SUMMARY STATS ─────────────────────────────────────────────────────────────
+let _summaryPeriods = null;
+
+const SUMMARY_STATS = [
+  { key: 'connections',         label: 'Total Connections',  isRate: false, color: '#3b9fd4' },
+  { key: 'messages',            label: 'Total Messages',     isRate: false, color: '#013A52' },
+  { key: 'acceptanceRate',      label: 'Avg Acceptance',     isRate: true,  color: '#1EB683' },
+  { key: 'responseRate',        label: 'Avg Response Rate',  isRate: true,  color: '#d97706' },
+  { key: 'positive',            label: 'Total Positive',     isRate: false, color: '#1EB683' },
+  { key: 'meetings',            label: 'Total Meetings',     isRate: false, color: '#013A52' },
+  { key: 'positiveBookingRate', label: 'Avg Booking Rate',   isRate: true,  color: '#d97706' },
+];
+
+function fmtStat(v, isRate) {
+  if (!v || v === 0) return '—';
+  if (isRate) return v.toFixed(1) + '%';
+  return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : Math.round(v).toLocaleString();
+}
+
+function summaryCards(periods, key) {
+  const p = periods[key] || {};
+  return SUMMARY_STATS.map(s =>
+    `<div class="summary-card">
+      <div class="summary-value">${fmtStat(p[s.key] || 0, s.isRate)}</div>
+      <div class="summary-label">${s.label}</div>
+    </div>`
+  ).join('');
+}
+
+function renderSummaryStats(periods, selectedKey = 'all') {
+  _summaryPeriods = periods;
+  const pills = P_KEYS.map(k =>
+    `<button class="summary-pill${k === selectedKey ? ' active' : ''}" onclick="switchSummaryPeriod('${k}')">${P_LABELS[k]}</button>`
+  ).join('');
+  return `
+    <div class="section" id="summary-section">
+      <div class="section-hdr">
+        <span class="section-title">Summary</span>
+        <div class="summary-period-pills">${pills}</div>
+      </div>
+      <div class="section-body">
+        <div class="summary-bar" id="summary-bar">${summaryCards(periods, selectedKey)}</div>
+      </div>
+    </div>`;
+}
+
+function switchSummaryPeriod(key) {
+  if (!_summaryPeriods) return;
+  document.querySelectorAll('.summary-pill').forEach(b =>
+    b.classList.toggle('active', b.textContent === P_LABELS[key])
+  );
+  document.getElementById('summary-bar').innerHTML = summaryCards(_summaryPeriods, key);
+}
+
 // ── RENDER: FULL PAGE ─────────────────────────────────────────────────────────
 function renderPage(c) {
   document.title = `Uptown Dashboard | ${c.companyName}`;
@@ -426,6 +507,7 @@ function renderPage(c) {
 
   const html = `
     <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div class="meta-link-row">${metaLinks}</div></div>
+    ${renderSummaryStats(c.periods)}
     ${renderPeriodTable(c.periods)}
     <div id="daily-chart-section"></div>
     <div id="daily-chart-below"></div>
