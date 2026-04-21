@@ -298,14 +298,6 @@ async function loadClient() {
       r = rows[rowIndex];
     }
     const client = parseRow(r);
-    if (client.password) {
-      const authKey = `client-auth-${clientSlug || clientId}`;
-      const uptownAuth = localStorage.getItem('uptown-auth') === 'ok';
-      if (!uptownAuth && localStorage.getItem(authKey) !== 'ok') {
-        renderPasswordGate(client, authKey);
-        return;
-      }
-    }
     renderPage(client);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
     // Restore clean URL (e.g. /august-tesfasilase-dialup-media)
@@ -382,8 +374,8 @@ function renderError(msg) {
   document.getElementById('header-name').textContent = isNotFound ? 'Link Expired' : 'Error';
 }
 
-// ── PASSWORD GATE ─────────────────────────────────────────────────────────────
-function renderPasswordGate(client, authKey) {
+// ── PASSWORD GATE REMOVED ─────────────────────────────────────────────────────
+function renderPasswordGate_UNUSED(client, authKey) {
   document.getElementById('header-name').textContent = client.name || 'Dashboard';
   document.getElementById('main').innerHTML = `
     <div class="error-state" style="padding-top:100px">
