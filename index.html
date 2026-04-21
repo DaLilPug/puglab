@@ -2077,26 +2077,23 @@ const fpEnd = flatpickr('#filter-end', {
   },
 });
 
-// ─── PASSWORD GATE ────────────────────────────────────────────────────────────
-function checkPw() {
-  const val = document.getElementById('pw-input').value;
-  if (val === 'bob') {
+// ─── GOOGLE AUTH ─────────────────────────────────────────────────────────────
+function handleGoogleSignIn(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const email = payload.email || '';
+  if (email.endsWith('@uptown.com')) {
     localStorage.setItem('uptown-auth', 'ok');
+    localStorage.setItem('uptown-user', email);
     const gate = document.getElementById('pw-gate');
     gate.style.transition = 'opacity .3s';
     gate.style.opacity = '0';
     setTimeout(() => { gate.style.display = 'none'; }, 280);
   } else {
-    const err = document.getElementById('pw-error');
-    err.textContent = 'Incorrect password. Please try again.';
-    const inp = document.getElementById('pw-input');
-    inp.classList.add('pw-err', 'pw-shake');
-    inp.value = '';
-    setTimeout(() => { inp.classList.remove('pw-shake', 'pw-err'); err.textContent = ''; }, 900);
-    inp.focus();
+    document.getElementById('pw-error').textContent = `Access restricted to @uptown.com accounts. You signed in as ${email}.`;
   }
 }
 </script>
+<script src="https://accounts.google.com/gsi/client" async></script>
 
 <div id="pw-gate">
   <div id="pw-modal">
@@ -2105,10 +2102,22 @@ function checkPw() {
     </div>
     <div id="pw-body">
       <div id="pw-title">Welcome Back</div>
-      <div id="pw-sub">Enter your password to access the dashboard</div>
-      <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()" autocomplete="current-password">
-      <div id="pw-error"></div>
-      <button id="pw-submit" onclick="checkPw()">Access Dashboard</button>
+      <div id="pw-sub">Sign in with your Uptown email to continue</div>
+      <div id="g_id_onload"
+        data-client_id="21528800875-gn35fno4q1rbdtp5abos5nm6h6865onq.apps.googleusercontent.com"
+        data-callback="handleGoogleSignIn"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-shape="rectangular"
+        data-theme="filled_blue"
+        data-text="sign_in_with"
+        data-size="large"
+        data-logo_alignment="left"
+        data-width="280">
+      </div>
+      <div id="pw-error" style="margin-top:12px"></div>
     </div>
   </div>
 </div>
