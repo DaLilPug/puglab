@@ -515,6 +515,11 @@ function renderPage(c) {
 
   document.getElementById('main').innerHTML = html;
 
+  // Kick off cumulative activity chart
+  const sheetSource = c.sheetUrl || (sheetParam ? decodeURIComponent(sheetParam) : '');
+  const idM = sheetSource.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (idM) loadActivityChart(idM[1]);
+  else document.getElementById('daily-chart-section').style.display = 'none';
 }
 
 // ── PERIOD COMPARISON TABLE ───────────────────────────────────────────────────
@@ -801,11 +806,6 @@ function renderInsights(periods) {
       </div>
       <div class="section-body">${items}</div>
     </div>`;
-  // Kick off cumulative activity chart
-  const sheetSource = c.sheetUrl || (sheetParam ? decodeURIComponent(sheetParam) : '');
-  const idM = sheetSource.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (idM) loadActivityChart(idM[1]);
-  else document.getElementById('daily-chart-section').style.display = 'none';
 }
 
 // ── ACTIVITY CHART (cumulative) ───────────────────────────────────────────────
