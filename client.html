@@ -16,6 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --navy: #013A52; --navy-dark: #012a3d; --navy-light: #edf3f6; --navy-mid: rgba(1,58,82,.06);
@@ -177,6 +178,21 @@
       .insight-icon { font-size: 15px; }
       .insight-title { font-size: 11px; }
     }
+    /* ACTIVITY CHART */
+    .daily-section { background: var(--surface-1); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; animation: fadeUp .5s ease both; animation-delay: .1s; }
+    .daily-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 22px 0; }
+    .daily-period-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .daily-pill { background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 5px 13px; font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gray-600); cursor: pointer; transition: all .18s; letter-spacing: .04em; }
+    .daily-pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .daily-pill:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    .daily-metric-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+    .daily-toggle { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: var(--gray-600); user-select: none; }
+    .daily-toggle input { accent-color: var(--green); width: 13px; height: 13px; cursor: pointer; }
+    .daily-chart-wrap { padding: 12px 22px 20px; position: relative; }
+    .daily-chart-wrap canvas { max-height: 260px; }
+    .daily-empty { text-align: center; padding: 48px 24px; color: var(--gray-400); font-size: 13px; font-weight: 600; }
+    .daily-loading { text-align: center; padding: 36px 24px; color: var(--gray-400); font-size: 12px; }
+
     /* SUMMARY STATS BAR — matches dashboard style */
     .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
     .summary-card { background: var(--surface-1); border-radius: var(--r-lg); padding: 20px 22px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .25s, transform .25s; }
@@ -494,6 +510,7 @@ function renderPage(c) {
     <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div class="meta-link-row">${metaLinks}</div></div>
     ${renderSummaryStats(c.periods)}
     ${renderPeriodTable(c.periods)}
+    <div id="daily-chart-section"></div>
     ${renderTrendCharts(c.periods)}`;
 
   document.getElementById('main').innerHTML = html;
@@ -784,9 +801,149 @@ function renderInsights(periods) {
       </div>
       <div class="section-body">${items}</div>
     </div>`;
+  // Kick off cumulative activity chart
+  const sheetSource = c.sheetUrl || (sheetParam ? decodeURIComponent(sheetParam) : '');
+  const idM = sheetSource.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (idM) loadActivityChart(idM[1]);
+  else document.getElementById('daily-chart-section').style.display = 'none';
 }
 
+// ── ACTIVITY CHART (cumulative) ───────────────────────────────────────────────
+let _activityData     = null;
+let _cumChartInstance = null;
+let _cumDays          = 90;
+let _cumMetrics       = ['responses', 'positive', 'meetings'];
 
+const ACTIVITY_METRIC_OPTS = [
+  { key:'connections', label:'Connections',        color:'#3b9fd4' },
+  { key:'messages',    label:'Messages',           color:'#6B9AB8' },
+  { key:'responses',   label:'Responses',          color:'#A8B4C4' },
+  { key:'positive',    label:'Positive Responses', color:'#d97706' },
+  { key:'meetings',    label:'Meetings',           color:'#1EB683' },
+];
+
+async function loadActivityChart(clientSheetId) {
+  const el = document.getElementById('daily-chart-section');
+  el.innerHTML = `<div class="daily-section"><div class="daily-loading">Loading activity data…</div></div>`;
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${clientSheetId}/gviz/tq?tqx=out:csv&sheet=Data%20Tracking&tq=select%20*%20limit%2010000`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (text.trim().startsWith('<')) throw new Error('Sheet not public');
+    const rows = Papa.parse(text, { skipEmptyLines: true }).data;
+    _activityData = parseActivityRows(rows);
+    if (!_activityData || _activityData.dates.length < 3) { el.innerHTML = ''; return; }
+    renderActivitySection(el);
+    buildActivityChart();
+  } catch(e) { el.innerHTML = ''; }
+}
+
+function parseActivityRows(rows) {
+  if (!rows || rows.length < 2) return null;
+  const header = rows[0];
+  const dateCols = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tenYearsAgo = new Date(today); tenYearsAgo.setFullYear(today.getFullYear() - 10);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  for (let c = 1; c < header.length; c++) {
+    const v = header[c]; if (!v) continue;
+    const d = new Date(v);
+    if (!isNaN(d.getTime()) && d >= tenYearsAgo && d <= tomorrow)
+      dateCols.push({ col: c, date: new Date(d.setHours(0,0,0,0)) });
+  }
+  if (dateCols.length < 3) return null;
+  const findRow = (kw, ex) => rows.find(r => { const l = String(r[0]||'').toLowerCase().trim(); return l.includes(kw) && !(ex||[]).some(x => l.includes(x)); });
+  const connRow = findRow('connection request');
+  const msgRow  = findRow('initial message');
+  const respRow = findRow('linkedin response', ['rate']);
+  const meetRow = findRow('meeting', ['rate']);
+  const posRow  = rows.find(r => { const l = String(r[0]||'').toLowerCase().trim(); return l === 'positive' || l === 'positive responses'; });
+  if (!connRow && !msgRow) return null;
+  const gv = (row, col) => row ? (parseFloat(String(row[col]||'').replace(/[%,$\s,]/g,'')) || 0) : 0;
+  dateCols.sort((a,b) => a.date - b.date);
+  const series = { connections:[], messages:[], responses:[], positive:[], meetings:[] };
+  const dates = [];
+  for (const { col, date } of dateCols) {
+    dates.push(date);
+    series.connections.push(gv(connRow, col));
+    series.messages.push(gv(msgRow, col));
+    series.responses.push(gv(respRow, col));
+    series.positive.push(gv(posRow, col));
+    series.meetings.push(gv(meetRow, col));
+  }
+  return { dates, series };
+}
+
+function renderActivitySection(el) {
+  const pills = [
+    { label:'1W', days:7 }, { label:'2W', days:14 }, { label:'3W', days:21 },
+    { label:'1M', days:30 }, { label:'2M', days:60 }, { label:'3M', days:90 },
+    { label:'1Y', days:365 }, { label:'All', days:0 },
+  ].map(p => `<button class="daily-pill cum-pill${_cumDays===p.days?' active':''}" onclick="setCumPeriod(${p.days})">${p.label}</button>`).join('');
+  const toggles = ACTIVITY_METRIC_OPTS.map(m =>
+    `<label class="daily-toggle"><input type="checkbox" value="${m.key}" ${_cumMetrics.includes(m.key)?'checked':''} onchange="toggleCumMetric('${m.key}',this.checked)"><span style="color:${m.color}">${m.label}</span></label>`
+  ).join('');
+  el.innerHTML = `
+    <div class="daily-section">
+      <div class="section-hdr" style="border-bottom:1px solid var(--border)">
+        <span class="section-title">Activity</span>
+        <span style="font-size:10px;color:var(--gray-400);font-weight:600">Cumulative over time</span>
+      </div>
+      <div class="daily-controls">
+        <div class="daily-period-pills">${pills}</div>
+        <div class="daily-metric-toggles">${toggles}</div>
+      </div>
+      <div class="daily-chart-wrap"><canvas id="cum-canvas"></canvas></div>
+    </div>`;
+}
+
+function buildActivityChart() {
+  const { dates, series } = _activityData;
+  const cutoff = _cumDays > 0 ? new Date(Date.now() - _cumDays * 86400000) : new Date(0);
+  const filtered = dates.reduce((acc, d, i) => {
+    if (d >= cutoff) {
+      acc.labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+', \''+String(d.getFullYear()).slice(2));
+      ACTIVITY_METRIC_OPTS.forEach(m => acc.data[m.key].push(series[m.key][i]));
+    }
+    return acc;
+  }, { labels:[], data:{connections:[],messages:[],responses:[],positive:[],meetings:[]} });
+  const cumData = {};
+  ACTIVITY_METRIC_OPTS.forEach(m => { let sum = 0; cumData[m.key] = filtered.data[m.key].map(v => { sum += v; return sum; }); });
+  const datasets = ACTIVITY_METRIC_OPTS.filter(m => _cumMetrics.includes(m.key)).map(m => ({
+    label: m.label, data: cumData[m.key], borderColor: m.color,
+    backgroundColor: m.color + '18', borderWidth: 2,
+    pointRadius: filtered.labels.length > 60 ? 0 : 2, pointHoverRadius: 4,
+    tension: 0.35, fill: true,
+  }));
+  const ctx = document.getElementById('cum-canvas');
+  if (!ctx) return;
+  if (_cumChartInstance) _cumChartInstance.destroy();
+  _cumChartInstance = new Chart(ctx, {
+    type: 'line', data: { labels: filtered.labels, datasets },
+    options: {
+      responsive: true, interaction: { mode:'index', intersect:false },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor:'rgba(1,58,82,.95)', titleColor:'#fff', bodyColor:'rgba(255,255,255,.8)', padding:10, cornerRadius:8 } },
+      scales: {
+        x: { grid: { color:'rgba(1,58,82,.04)' }, ticks: { font:{size:10,family:'Montserrat'}, color:'#8899a6', maxTicksLimit:10, maxRotation:0 } },
+        y: { beginAtZero:true, grid: { color:'rgba(1,58,82,.05)' }, ticks: { font:{size:10,family:'Montserrat'}, color:'#8899a6' } },
+      },
+    }
+  });
+}
+
+function setCumPeriod(days) {
+  _cumDays = days;
+  const map = { 7:'1W', 14:'2W', 21:'3W', 30:'1M', 60:'2M', 90:'3M', 365:'1Y', 0:'All' };
+  document.querySelectorAll('.cum-pill').forEach(b => b.classList.toggle('active', b.textContent === map[days]));
+  buildActivityChart();
+}
+
+function toggleCumMetric(key, checked) {
+  if (checked && !_cumMetrics.includes(key)) _cumMetrics.push(key);
+  if (!checked) _cumMetrics = _cumMetrics.filter(k => k !== key);
+  buildActivityChart();
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 if (!clientId && !clientSlug) {
