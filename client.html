@@ -440,6 +440,8 @@ function fmtStat(v, isRate) {
   return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : Math.round(v).toLocaleString();
 }
 
+const PERIOD_DAYS = { '1w':7, '2w':14, '3w':21, '1m':30, '2m':60, '3m':90, 'all':0 };
+
 function summaryCards(periods, key) {
   const p = periods[key] || {};
   return SUMMARY_STATS.map(s =>
@@ -450,7 +452,7 @@ function summaryCards(periods, key) {
   ).join('');
 }
 
-function renderSummaryStats(periods, selectedKey = 'all') {
+function renderCombinedSummary(periods, selectedKey = 'all') {
   _summaryPeriods = periods;
   const pills = P_KEYS.map(k =>
     `<button class="summary-pill${k === selectedKey ? ' active' : ''}" onclick="switchSummaryPeriod('${k}')">${P_LABELS[k]}</button>`
@@ -464,6 +466,7 @@ function renderSummaryStats(periods, selectedKey = 'all') {
       <div class="section-body">
         <div class="summary-bar" id="summary-bar">${summaryCards(periods, selectedKey)}</div>
       </div>
+      <div id="activity-chart-area"></div>
     </div>`;
 }
 
@@ -473,6 +476,9 @@ function switchSummaryPeriod(key) {
     b.classList.toggle('active', b.textContent === P_LABELS[key])
   );
   document.getElementById('summary-bar').innerHTML = summaryCards(_summaryPeriods, key);
+  // Sync activity chart to same period
+  _cumDays = PERIOD_DAYS[key] ?? 0;
+  buildActivityChart();
 }
 
 // ── RENDER: FULL PAGE ─────────────────────────────────────────────────────────
@@ -508,18 +514,17 @@ function renderPage(c) {
 
   const html = `
     <div class="meta-bar"><div class="meta-chips-left">${metaChips}</div><div class="meta-link-row">${metaLinks}</div></div>
-    ${renderSummaryStats(c.periods)}
-    ${renderPeriodTable(c.periods)}
-    <div id="daily-chart-section"></div>
-    ${renderTrendCharts(c.periods)}`;
+    ${renderCombinedSummary(c.periods)}
+    ${renderTrendCharts(c.periods)}
+    ${renderPeriodTable(c.periods)}`;
 
   document.getElementById('main').innerHTML = html;
 
-  // Kick off cumulative activity chart
+  // Kick off cumulative activity chart inside combined summary
   const sheetSource = c.sheetUrl || (sheetParam ? decodeURIComponent(sheetParam) : '');
   const idM = sheetSource.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (idM) loadActivityChart(idM[1]);
-  else document.getElementById('daily-chart-section').style.display = 'none';
+  else document.getElementById('activity-chart-area').style.display = 'none';
 }
 
 // ── PERIOD COMPARISON TABLE ───────────────────────────────────────────────────
@@ -819,8 +824,8 @@ const ACTIVITY_METRIC_OPTS = [
 ];
 
 async function loadActivityChart(clientSheetId) {
-  const el = document.getElementById('daily-chart-section');
-  el.innerHTML = `<div class="daily-section"><div class="daily-loading">Loading activity data…</div></div>`;
+  const el = document.getElementById('activity-chart-area');
+  el.innerHTML = `<div style="padding:20px 22px;color:var(--gray-400);font-size:12px">Loading activity data…</div>`;
   try {
     const url = `https://docs.google.com/spreadsheets/d/${clientSheetId}/gviz/tq?tqx=out:csv&sheet=Data%20Tracking&tq=select%20*%20limit%2010000`;
     const res = await fetch(url);
@@ -872,22 +877,13 @@ function parseActivityRows(rows) {
 }
 
 function renderActivitySection(el) {
-  const pills = [
-    { label:'1W', days:7 }, { label:'2W', days:14 }, { label:'3W', days:21 },
-    { label:'1M', days:30 }, { label:'2M', days:60 }, { label:'3M', days:90 },
-    { label:'1Y', days:365 }, { label:'All', days:0 },
-  ].map(p => `<button class="daily-pill cum-pill${_cumDays===p.days?' active':''}" onclick="setCumPeriod(${p.days})">${p.label}</button>`).join('');
   const toggles = ACTIVITY_METRIC_OPTS.map(m =>
     `<label class="daily-toggle"><input type="checkbox" value="${m.key}" ${_cumMetrics.includes(m.key)?'checked':''} onchange="toggleCumMetric('${m.key}',this.checked)"><span style="color:${m.color}">${m.label}</span></label>`
   ).join('');
   el.innerHTML = `
-    <div class="daily-section">
-      <div class="section-hdr" style="border-bottom:1px solid var(--border)">
-        <span class="section-title">Activity</span>
-        <span style="font-size:10px;color:var(--gray-400);font-weight:600">Cumulative over time</span>
-      </div>
-      <div class="daily-controls">
-        <div class="daily-period-pills">${pills}</div>
+    <div style="border-top:1px solid var(--border)">
+      <div class="daily-controls" style="padding:14px 22px 0">
+        <span style="font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em">Cumulative</span>
         <div class="daily-metric-toggles">${toggles}</div>
       </div>
       <div class="daily-chart-wrap"><canvas id="cum-canvas"></canvas></div>
@@ -928,12 +924,6 @@ function buildActivityChart() {
   });
 }
 
-function setCumPeriod(days) {
-  _cumDays = days;
-  const map = { 7:'1W', 14:'2W', 21:'3W', 30:'1M', 60:'2M', 90:'3M', 365:'1Y', 0:'All' };
-  document.querySelectorAll('.cum-pill').forEach(b => b.classList.toggle('active', b.textContent === map[days]));
-  buildActivityChart();
-}
 
 function toggleCumMetric(key, checked) {
   if (checked && !_cumMetrics.includes(key)) _cumMetrics.push(key);
