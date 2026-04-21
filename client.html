@@ -58,6 +58,8 @@
     .meta-link-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .sheet-meta-link { font-size: 12px; font-weight: 700; color: #00b4d8; text-decoration: none; border: 1px solid #00b4d8; border-radius: 6px; padding: 5px 12px; white-space: nowrap; transition: background 0.15s; }
     .sheet-meta-link:hover { background: rgba(0,180,216,0.1); }
+    .btn-short { display: none; }
+    .btn-full  { display: inline; }
     .meta-chip { display: flex; flex-direction: column; background: var(--surface-1); border-radius: var(--r); padding: 10px 16px; box-shadow: var(--shadow-xs); border: 1px solid var(--border); min-width: 110px; transition: box-shadow .2s, transform .2s; animation: fadeUp .4s ease both; }
     .meta-chip:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
     .meta-chip-label { font-size: 9px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px; }
@@ -140,6 +142,8 @@
       .meta-chip { min-width: 90px; padding: 8px 12px; }
       .meta-link-row { width: 100%; }
       .sheet-meta-link { flex: 1; text-align: center; padding: 8px 4px; }
+      .btn-full  { display: none; }
+      .btn-short { display: inline; }
       .section { margin-bottom: 16px; }
       .section-hdr { padding: 12px 16px; flex-wrap: wrap; gap: 4px; }
       .section-hdr > span:last-child { display: none; }
@@ -214,6 +218,13 @@ const urlParams   = new URLSearchParams(window.location.search);
 const clientSlug  = urlParams.get('client') || '';
 const clientId    = urlParams.get('id') || '';
 const sheetParam  = urlParams.get('sheet') || '';
+
+function fmtDate(d) {
+  if (!d) return '';
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+  return d;
+}
 
 function toSlug(name, company) {
   return [name, company].filter(Boolean).join(' ')
@@ -297,7 +308,7 @@ function parseRow(r) {
     lastUpdated:  r[74]||'',
     error:       (r[75]||'').trim(),
     get password() {
-      return ((this.companyName || '') + (this.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+      return ((this.companyName || '') + fmtDate(this.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
     },
     periods: {
       '1w':  parsePeriod(11), '2w':  parsePeriod(20), '3w':  parsePeriod(29),
@@ -387,16 +398,16 @@ function renderPage(c) {
     ['Status', statusBadge],
     c.service    ? ['Service', c.service]        : null,
     c.cam        ? ['Account Manager', c.cam]   : null,
-    c.startDate  ? ['Start Date', c.startDate]  : null,
-    c.endDate    ? ['End Date', c.endDate]       : null,
+    c.startDate  ? ['Start Date', fmtDate(c.startDate)]  : null,
+    c.endDate    ? ['End Date',   fmtDate(c.endDate)]    : null,
   ].filter(Boolean).map(([label, val]) =>
     `<div class="meta-chip"><span class="meta-chip-label">${label}</span><span class="meta-chip-value">${val}</span></div>`
   ).join('');
 
   const linkIcon = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>`;
-  const sheetBtn = c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Sheet</a>` : '';
-  const msgBtn   = c.messagingUrl ? `<a href="${c.messagingUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Messaging</a>` : '';
-  const contentBtn = c.contentUrl ? `<a href="${c.contentUrl}" target="_blank" class="sheet-meta-link">${linkIcon} Content</a>` : '';
+  const sheetBtn = c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank" class="sheet-meta-link">${linkIcon} <span class="btn-full">Open Sheet</span><span class="btn-short">Sheet</span></a>` : '';
+  const msgBtn   = c.messagingUrl ? `<a href="${c.messagingUrl}" target="_blank" class="sheet-meta-link">${linkIcon} <span class="btn-full">See Messaging</span><span class="btn-short">Messaging</span></a>` : '';
+  const contentBtn = c.contentUrl ? `<a href="${c.contentUrl}" target="_blank" class="sheet-meta-link">${linkIcon} <span class="btn-full">Review Content</span><span class="btn-short">Content</span></a>` : '';
   const metaLinks = [sheetBtn, msgBtn, contentBtn].filter(Boolean).join('');
 
   const html = `

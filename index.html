@@ -1617,7 +1617,7 @@ function renderTable() {
       <td><div class="td-name">${c.name}</div></td>
       <td>${c.companyName||'<span class="muted">—</span>'}</td>
       <td>${c.service||'<span class="muted">—</span>'}</td>
-      <td style="white-space:nowrap">${c.startDate||'<span class="muted">—</span>'}</td>
+      <td style="white-space:nowrap">${c.startDate?fmtDate(c.startDate):'<span class="muted">—</span>'}</td>
       <td style="white-space:nowrap">${c.strategist||'<span class="muted">—</span>'}</td>
       <td style="white-space:nowrap">${c.cam||'<span class="muted">—</span>'}</td>
       <td>${badge}</td>
@@ -1675,7 +1675,7 @@ function renderCards() {
         <div>
           <div class="card-name">${c.name}</div>
           ${meta?`<div class="card-meta">${meta}</div>`:''}
-          ${c.startDate?`<div class="card-meta">Since ${c.startDate}${c.endDate?' → '+c.endDate:''}</div>`:''}
+          ${c.startDate?`<div class="card-meta">Since ${fmtDate(c.startDate)}${c.endDate?' → '+fmtDate(c.endDate):''}</div>`:''}
         </div>
         <div class="card-actions">${badge}<button class="action-btn" onclick="event.stopPropagation();refreshOne('${c.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div>
       </div>
@@ -1808,8 +1808,15 @@ function updateHubModeUI() {
 }
 
 // ─── CLIENT DETAIL ───────────────────────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '';
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+  return d;
+}
+
 function clientPassword(c) {
-  return ((c.companyName || c.company || '') + (c.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return ((c.companyName || c.company || '') + fmtDate(c.startDate || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function copyPassword(id, el) {
@@ -2006,8 +2013,8 @@ function renderDetail(c) {
       <div class="detail-info-item"><strong>Status</strong>${statusBadge}</div>
       ${c.strategist?`<div class="detail-info-item"><strong>Strategist</strong>${c.strategist}</div>`:''}
       ${c.cam?`<div class="detail-info-item"><strong>CAM</strong>${c.cam}</div>`:''}
-      ${c.startDate?`<div class="detail-info-item"><strong>Start Date</strong>${c.startDate}</div>`:''}
-      ${c.endDate?`<div class="detail-info-item"><strong>End Date</strong>${c.endDate}</div>`:''}
+      ${c.startDate?`<div class="detail-info-item"><strong>Start Date</strong>${fmtDate(c.startDate)}</div>`:''}
+      ${c.endDate?`<div class="detail-info-item"><strong>End Date</strong>${fmtDate(c.endDate)}</div>`:''}
     </div>
 
     <div class="detail-section">
