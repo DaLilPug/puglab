@@ -272,7 +272,8 @@ async function loadClient() {
     const client = parseRow(r);
     if (client.password) {
       const authKey = `client-auth-${clientSlug || clientId}`;
-      if (localStorage.getItem(authKey) !== 'ok') {
+      const uptownAuth = localStorage.getItem('uptown-auth') === 'ok';
+      if (!uptownAuth && localStorage.getItem(authKey) !== 'ok') {
         renderPasswordGate(client, authKey);
         return;
       }
