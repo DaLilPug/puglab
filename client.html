@@ -272,6 +272,10 @@ async function loadClient() {
     }
     renderPage(client);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    // Restore clean URL (e.g. /august-tesfasilase-dialup-media)
+    if (clientSlug && window.location.pathname !== '/' + clientSlug) {
+      history.replaceState(null, '', '/' + clientSlug);
+    }
   } catch(e) {
     renderError(e.message);
   }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Redirecting…</title>
+  <script>
+    (function() {
+      const path = window.location.pathname.replace(/^\/|\/$/g, '');
+      const skip = ['index.html', 'client.html', 'strategist.html', '404.html', ''];
+      if (path && !skip.includes(path) && !path.includes('.')) {
+        window.location.replace('/client.html?client=' + encodeURIComponent(path));
+      } else {
+        window.location.replace('/');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>

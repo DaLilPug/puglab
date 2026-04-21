@@ -1841,7 +1841,7 @@ function openDetail(id) {
   const c = clients.find(x => x.id === id);
   if (!c) return;
   const slug = toSlug(c.name, c.companyName || c.company || '');
-  window.open(`client.html?client=${slug}`, '_blank');
+  window.open(`/client.html?client=${slug}`, '_blank');
 }
 
 function periodBarChartSVG(periods, key, isRate) {
